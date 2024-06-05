@@ -1,14 +1,16 @@
-import IconExplore from "@/components/icons/IconExplore";
-import IconPlay from "@/components/icons/IconPlay";
+import ActiveLink from "@/components/common/ActiveLink";
 import { menuItem } from "@/constants";
+import { TMenuItem } from "@/types";
+import Link from "next/link";
 import React from "react";
 
 const Sidebar = () => {
   return (
     <div className="p-5 border-r border-r-gray-200">
-      <a href="#" className="font-bold text-3xl inline-block mb-5">
-        ManhDemy
-      </a>
+      <Link href="#" className="font-bold text-3xl inline-block mb-5">
+        <span className="text-primary">M</span>
+        anhDemy
+      </Link>
       <ul className="flex flex-col gap-2 ">
         {menuItem.map((item, index) => (
           <MenuItem
@@ -22,24 +24,13 @@ const Sidebar = () => {
     </div>
   );
 };
-function MenuItem({
-  url = "/",
-  title = "",
-  icon,
-}: {
-  url: string;
-  title: string;
-  icon?: React.ReactNode;
-}) {
+function MenuItem({ url = "/", title = "", icon }: TMenuItem) {
   return (
     <li>
-      <a
-        href={url}
-        className="p-3 rounded-md flex items-center gap-3 hover:bg-primary hover:text-primary hover:bg-opacity-10 transition-all"
-      >
+      <ActiveLink url={url}>
         {icon}
         {title}
-      </a>
+      </ActiveLink>
     </li>
   );
 }
