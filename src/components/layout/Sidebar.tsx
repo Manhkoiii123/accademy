@@ -7,7 +7,7 @@ import React from "react";
 const Sidebar = () => {
   return (
     <div className="p-5 border-r border-r-gray-200">
-      <Link href="#" className="font-bold text-3xl inline-block mb-5">
+      <Link href="#" className="font-bold text-3xl inline-block mb-10">
         <span className="text-primary">M</span>
         anhDemy
       </Link>
