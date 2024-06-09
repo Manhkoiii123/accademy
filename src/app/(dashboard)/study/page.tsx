@@ -5,14 +5,14 @@ import React from "react";
 
 const page = () => {
   return (
-    <div>
-      <Heading>Khám phá</Heading>
+    <>
+      <Heading>Khu vực học tập</Heading>
       <Coursegrid>
         <CourseItem />
         <CourseItem />
         <CourseItem />
       </Coursegrid>
-    </div>
+    </>
   );
 };
 

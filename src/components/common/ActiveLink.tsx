@@ -14,10 +14,10 @@ const ActiveLink = ({ url, children }: TActiveLinkProps) => {
         query: {},
       }}
       //   svgan là cái aimation mà nó vẽ lần lượt hiện ra cái icon
-      className={`p-3 rounded-md flex items-center gap-3  ${
+      className={`p-3 rounded-md dark:text-grayDark flex items-center gap-3  ${
         isActive
-          ? "text-white bg-primary svg-animation"
-          : "hover:bg-primary hover:text-primary hover:bg-opacity-10 transition-all"
+          ? "!text-white bg-primary svg-animation"
+          : "hover:!bg-primary hover:!text-primary hover:!bg-opacity-10 transition-all"
       }`}
     >
       {children}
