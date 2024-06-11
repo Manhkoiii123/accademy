@@ -1,14 +1,17 @@
 // những action liên quan đến user trong này
 // chạy ở phía server
-"user server";
+"use server";
 
 import User, { IUser } from "@/database/user.modal";
 import { connectToDatabase } from "@/lib/mongoose";
+import { TCreateUserParams } from "@/types";
 
-export default async function createUser(params: IUser) {
+export default async function createUser(
+  params: TCreateUserParams
+): Promise<TCreateUserParams | undefined> {
   try {
     connectToDatabase();
-    const newUser = await User.create(params);
+    const newUser: TCreateUserParams = await User.create(params);
     return newUser;
   } catch (error) {}
 }
