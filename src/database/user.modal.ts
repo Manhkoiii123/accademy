@@ -5,12 +5,12 @@ export interface IUser extends Document {
   clerkId: string;
   name: string;
   username: string;
-  email_address: string;
+  email: string;
   avatar: string;
   status: EUserStatus;
   role: EUserRole;
-  course: Schema.Types.ObjectId[];
-  createdAt: Date;
+  courses: Schema.Types.ObjectId[];
+  created_at: Date;
 }
 const userSchema = new Schema<IUser>({
   clerkId: {
@@ -24,7 +24,7 @@ const userSchema = new Schema<IUser>({
     unique: true,
     required: true,
   },
-  email_address: {
+  email: {
     type: String,
     unique: true,
     required: true,
@@ -32,13 +32,13 @@ const userSchema = new Schema<IUser>({
   avatar: {
     type: String,
   },
-  course: [
+  courses: [
     {
       type: Schema.Types.ObjectId,
       ref: "Course", //liên kết tới bảng khác
     },
   ],
-  createdAt: {
+  created_at: {
     type: Date,
     default: Date.now,
   },
