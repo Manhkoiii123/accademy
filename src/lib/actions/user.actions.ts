@@ -6,7 +6,7 @@ import User, { IUser } from "@/database/user.modal";
 import { connectToDatabase } from "@/lib/mongoose";
 import { TCreateUserParams } from "@/types";
 
-export default async function createUser(
+export async function createUser(
   params: TCreateUserParams
 ): Promise<TCreateUserParams | undefined> {
   try {
@@ -14,4 +14,22 @@ export default async function createUser(
     const newUser: TCreateUserParams = await User.create(params);
     return newUser;
   } catch (error) {}
+}
+
+export async function getUserInfo({
+  userId,
+}: {
+  userId: string;
+}): Promise<IUser | null | undefined> {
+  // cái userId là cái clerk Id (do dùng cái auth() => của clerk)
+  try {
+    connectToDatabase();
+    const findUser = await User.findOne({ clerkId: userId });
+    if (!findUser) {
+      return null;
+    }
+    return findUser;
+  } catch (error) {
+    console.log(error);
+  }
 }

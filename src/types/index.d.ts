@@ -15,4 +15,10 @@ type TCreateUserParams = {
   email: string;
   avatar?: string;
 };
+
+export type TCreateCourseParams = {
+  title: string;
+  slug: string;
+  author: string;
+};
 export { TActiveLinkProps, TMenuItem, TCreateUserParams };
