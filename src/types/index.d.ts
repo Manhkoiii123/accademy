@@ -1,3 +1,5 @@
+import { ICourse } from "@/database/course.modal";
+
 type TActiveLinkProps = {
   url: string;
   children: React.ReactNode;
@@ -20,5 +22,9 @@ export type TCreateCourseParams = {
   title: string;
   slug: string;
   author: string;
+};
+export type TUpdateCourseParams = {
+  slug: string;
+  updateData: Partial<ICourse>; // dùng partial biến all các cái trong iCO thành ko bắt buộc
 };
 export { TActiveLinkProps, TMenuItem, TCreateUserParams };

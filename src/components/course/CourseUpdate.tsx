@@ -16,17 +16,18 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
-import { createCourse } from "@/lib/actions/course.actions";
+import { createCourse, updateCourse } from "@/lib/actions/course.actions";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import { Textarea } from "@/components/ui/textarea";
 import { ECourseLevel, ECourseStatus } from "@/types/enums";
+import { ICourse } from "@/database/course.modal";
 
 const formSchema = z.object({
   title: z.string().min(10, "Tên khóa học phải có ít nhất 10 kí tự"),
   slug: z.string().optional(),
-  price: z.number().int().positive().optional(),
-  sale_price: z.number().int().positive().optional(),
+  price: z.number().optional(),
+  sale_price: z.number().optional(),
   intro_url: z.string().optional(),
   desc: z.string().optional(),
   image: z.string().optional(),
@@ -34,7 +35,7 @@ const formSchema = z.object({
     .enum([
       ECourseStatus.APPROVED,
       ECourseStatus.PENDING,
-      ECourseStatus.PENDING,
+      ECourseStatus.REJECTED,
     ])
     .optional(),
   level: z
@@ -48,38 +49,65 @@ const formSchema = z.object({
   info: z.object({
     requirements: z.array(z.string()).optional(),
     benefits: z.array(z.string()).optional(),
-    qa: z.array(
-      z.object({
-        question: z.string(),
-        answer: z.string(),
-      })
-    ),
+    qa: z
+      .array(
+        z.object({
+          question: z.string(),
+          answer: z.string(),
+        })
+      )
+      .optional(),
   }),
-  views: z.number().int().positive().optional(),
+  views: z.number().int().optional(),
 });
-const CourseUpdate = () => {
+const CourseUpdate = ({ slug, data }: { slug: string; data: ICourse }) => {
   const [isSubmit, setIsSubmit] = useState(false);
+  const router = useRouter();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      title: "",
-      slug: "",
-      // price: 0,
-      // sale_price: 0,
-      intro_url: "",
-      desc: "",
-      image: "",
-      status: ECourseStatus.PENDING,
-      level: ECourseLevel.BEGINNER,
-      info: {
-        requirements: [],
-        benefits: [],
-        qa: [],
-      },
-      // views: 0,
+      title: data.title,
+      slug: data.slug,
+      price: data.price,
+      sale_price: data.sale_price,
+      intro_url: data.intro_url,
+      desc: data.desc,
+      image: data.image,
+      status: data.status,
+      level: data.level,
+      views: data.views,
     },
   });
-  async function onSubmit(values: z.infer<typeof formSchema>) {}
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    setIsSubmit(true);
+    try {
+      const res = await updateCourse({
+        slug: slug,
+        updateData: {
+          title: values.title,
+          slug: values.slug,
+          price: values.price,
+          sale_price: values.sale_price,
+          intro_url: values.intro_url,
+          desc: values.desc,
+          // image: values.image,
+          // status: values.status,
+          // level: values.level,
+          views: values.views,
+        },
+      });
+      if (values.slug) {
+        router.push(`/manage/course/update?slug=${values.slug}`);
+      }
+      if (res?.success) {
+        toast.success(res.message);
+      }
+    } catch (error) {
+      console.log("🚀 ~ onSubmit ~ error:", error);
+    } finally {
+      setIsSubmit(false);
+    }
+  }
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} autoComplete="off">
@@ -117,7 +145,12 @@ const CourseUpdate = () => {
               <FormItem>
                 <FormLabel>Giá khuyến mãi</FormLabel>
                 <FormControl>
-                  <Input placeholder="599.000" {...field} />
+                  <Input
+                    type="number"
+                    placeholder="599.000"
+                    {...field}
+                    onChange={(e) => field.onChange(Number(e.target.value))}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -130,7 +163,12 @@ const CourseUpdate = () => {
               <FormItem>
                 <FormLabel>Giá gốc</FormLabel>
                 <FormControl>
-                  <Input placeholder="999.000" {...field} />
+                  <Input
+                    type="number"
+                    placeholder="999.000"
+                    {...field}
+                    onChange={(e) => field.onChange(Number(e.target.value))}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -187,7 +225,12 @@ const CourseUpdate = () => {
               <FormItem>
                 <FormLabel>Lượt xem</FormLabel>
                 <FormControl>
-                  <Input placeholder="1000" type="number" {...field} />
+                  <Input
+                    placeholder="1000"
+                    type="number"
+                    {...field}
+                    onChange={(e) => field.onChange(Number(e.target.value))}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>

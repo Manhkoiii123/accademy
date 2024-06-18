@@ -1,16 +1,17 @@
 import { IconClock, IconEye, IconStar } from "@/components/icons";
+import { ICourse } from "@/database/course.modal";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 
-const CourseItem = () => {
+const CourseItem = ({ data }: { data: ICourse }) => {
   const courseInfo = [
     {
-      title: "3000",
+      title: data.views,
       icon: (className?: string) => <IconEye className={className} />,
     },
     {
-      title: "5.0",
+      title: data.rating[0],
       icon: (className?: string) => <IconStar className={className} />,
     },
     {
@@ -20,7 +21,7 @@ const CourseItem = () => {
   ];
   return (
     <div className="bg-white border dark:bg-grayDarker dark:border-opacity-10 border-gray-200 p-4 rounded-2xl ">
-      <Link href={"#"} className="block h-[180px] relative">
+      <Link href={`/course/${data.slug}`} className="block h-[180px] relative">
         <Image
           alt="image course"
           src={
@@ -32,14 +33,12 @@ const CourseItem = () => {
           sizes="@media (min-width:640px) 300px, 100vw"
           priority // độ ưu tiên load trước
         />
-        <span className="inline-block px-3 py-1 absolute top-3 right-3 z-10 rounded-xl text-white bg-green-500 text-xs font-medium">
+        {/* <span className="inline-block px-3 py-1 absolute top-3 right-3 z-10 rounded-xl text-white bg-green-500 text-xs font-medium">
           New
-        </span>
+        </span> */}
       </Link>
       <div className="pt-4">
-        <h3 className="font-bold text-lg mb-5">
-          Khóa học NextJs Pro - Xây dựng E-Learning system hoàn chỉnh
-        </h3>
+        <h3 className="font-bold text-lg mb-5">{data.title}</h3>
         <div className="flex items-center gap-3  mb-5 text-xs text-gray-500">
           {courseInfo.map((item, index) => {
             return (
@@ -51,12 +50,12 @@ const CourseItem = () => {
           })}
 
           <span className="font-bold text-base text-primary ml-auto">
-            799.000đ
+            {data.price}
           </span>
         </div>
 
         <Link
-          href={"#"}
+          href={`/course/${data.slug}`}
           className="flex w-full mt-10 items-center justify-center rounded-lg text-white font-semibold bg-primary h-12"
         >
           Xem chi tiết
