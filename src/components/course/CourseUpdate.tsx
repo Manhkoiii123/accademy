@@ -22,7 +22,8 @@ import { useRouter } from "next/navigation";
 import { Textarea } from "@/components/ui/textarea";
 import { ECourseLevel, ECourseStatus } from "@/types/enums";
 import { ICourse } from "@/database/course.modal";
-
+import { useImmer } from "use-immer";
+import { IconAdd } from "@/components/icons";
 const formSchema = z.object({
   title: z.string().min(10, "Tên khóa học phải có ít nhất 10 kí tự"),
   slug: z.string().optional(),
@@ -62,6 +63,12 @@ const formSchema = z.object({
 });
 const CourseUpdate = ({ slug, data }: { slug: string; data: ICourse }) => {
   const [isSubmit, setIsSubmit] = useState(false);
+  const [courseInfo, setCourseInfo] = useImmer({
+    requirements: data.info?.requirements || [],
+    benefits: data.info?.benefits || [],
+    qa: data.info?.qa || [],
+  });
+
   const router = useRouter();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -76,6 +83,11 @@ const CourseUpdate = ({ slug, data }: { slug: string; data: ICourse }) => {
       status: data.status,
       level: data.level,
       views: data.views,
+      info: {
+        requirements: courseInfo.requirements,
+        benefits: courseInfo.benefits,
+        qa: courseInfo.qa,
+      },
     },
   });
   async function onSubmit(values: z.infer<typeof formSchema>) {
@@ -94,6 +106,11 @@ const CourseUpdate = ({ slug, data }: { slug: string; data: ICourse }) => {
           // status: values.status,
           // level: values.level,
           views: values.views,
+          info: {
+            requirements: courseInfo.requirements,
+            benefits: courseInfo.benefits,
+            qa: courseInfo.qa,
+          },
         },
       });
       if (values.slug) {
@@ -199,7 +216,6 @@ const CourseUpdate = ({ slug, data }: { slug: string; data: ICourse }) => {
                 <FormLabel>Ảnh khóa học</FormLabel>
                 <FormControl>
                   <div className="h-[200px] border-gray-200 border rounded-md"></div>
-                  {/* <Textarea placeholder="Mô tả khóa học" {...field} /> */}
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -267,9 +283,37 @@ const CourseUpdate = ({ slug, data }: { slug: string; data: ICourse }) => {
             name="info.requirements"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Yêu cầu</FormLabel>
+                <FormLabel className="flex items-center justify-between gap-5">
+                  <span>Yêu cầu</span>
+                  <button
+                    type="button"
+                    className="text-primary"
+                    onClick={() => {
+                      setCourseInfo((draft) => {
+                        draft.requirements.push("");
+                      });
+                    }}
+                  >
+                    <IconAdd />
+                  </button>
+                </FormLabel>
                 <FormControl>
-                  <Input placeholder="https://youtube.com" {...field} />
+                  <>
+                    {courseInfo.requirements.map((r, index) => {
+                      return (
+                        <Input
+                          key={index}
+                          placeholder={`Yêu cầu số ${index + 1}`}
+                          value={r}
+                          onChange={(e) =>
+                            setCourseInfo((draft) => {
+                              draft.requirements[index] = e.target.value;
+                            })
+                          }
+                        />
+                      );
+                    })}
+                  </>
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -280,9 +324,37 @@ const CourseUpdate = ({ slug, data }: { slug: string; data: ICourse }) => {
             name="info.benefits"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Lợi ích</FormLabel>
+                <FormLabel className="flex items-center justify-between gap-5">
+                  <span>Lợi ích</span>
+                  <button
+                    type="button"
+                    className="text-primary"
+                    onClick={() => {
+                      setCourseInfo((draft) => {
+                        draft.benefits.push("");
+                      });
+                    }}
+                  >
+                    <IconAdd />
+                  </button>
+                </FormLabel>
                 <FormControl>
-                  <Input placeholder="https://youtube.com" {...field} />
+                  <>
+                    {courseInfo.benefits.map((r, index) => {
+                      return (
+                        <Input
+                          key={index}
+                          value={r}
+                          placeholder={`Lợi ích số ${index + 1}`}
+                          onChange={(e) =>
+                            setCourseInfo((draft) => {
+                              draft.benefits[index] = e.target.value;
+                            })
+                          }
+                        />
+                      );
+                    })}
+                  </>
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -290,12 +362,52 @@ const CourseUpdate = ({ slug, data }: { slug: string; data: ICourse }) => {
           />
           <FormField
             control={form.control}
-            name="info.benefits"
+            name="info.qa"
             render={({ field }) => (
-              <FormItem>
-                <FormLabel>Question and answer</FormLabel>
+              <FormItem className="col-start-1 col-end-3">
+                <FormLabel className="flex items-center justify-between gap-5">
+                  <span>Câu hỏi thường gặp</span>
+                  <button
+                    type="button"
+                    className="text-primary"
+                    onClick={() => {
+                      setCourseInfo((draft) => {
+                        draft.qa.push({ question: "", answer: "" });
+                      });
+                    }}
+                  >
+                    <IconAdd />
+                  </button>
+                </FormLabel>
                 <FormControl>
-                  <Input placeholder="https://youtube.com" {...field} />
+                  <>
+                    {courseInfo.qa.map((r, index) => {
+                      return (
+                        <div className="grid grid-cols-2 gap-5" key={index}>
+                          <Input
+                            key={index}
+                            value={r.question}
+                            placeholder={`Câu hỏi số ${index + 1}`}
+                            onChange={(e) =>
+                              setCourseInfo((draft) => {
+                                draft.qa[index].question = e.target.value;
+                              })
+                            }
+                          />
+                          <Input
+                            key={index}
+                            value={r.answer}
+                            placeholder={`Câu trả lời số ${index + 1}`}
+                            onChange={(e) =>
+                              setCourseInfo((draft) => {
+                                draft.qa[index].answer = e.target.value;
+                              })
+                            }
+                          />
+                        </div>
+                      );
+                    })}
+                  </>
                 </FormControl>
                 <FormMessage />
               </FormItem>

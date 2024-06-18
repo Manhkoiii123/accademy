@@ -11,7 +11,7 @@ import React from "react";
 const Sidebar = () => {
   const { userId } = useAuth();
   return (
-    <div className="p-5 border-r border-r-gray-200 bg-white dark:bg-grayDarker dark:border-opacity-10  flex flex-col">
+    <div className="hidden p-5 border-r border-r-gray-200 bg-white dark:bg-grayDarker dark:border-opacity-10  lg:flex flex-col">
       <Link href="#" className="font-bold text-3xl inline-block mb-10">
         <span className="text-primary">M</span>
         anhDemy
