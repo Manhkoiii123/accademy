@@ -6,13 +6,19 @@ import React from "react";
 
 const page = async ({ params }: { params: { slug: string } }) => {
   const data = await getCourseBySlug({ slug: params.slug });
-  const videoId = data?.intro_url.split("v=")[1];
+  // const videoId = data?.intro_url.split("=")[1];
+  let videoId;
+  if (data?.intro_url) {
+    const urlParams = new URLSearchParams(new URL(data?.intro_url!).search);
+    videoId = urlParams.get("v");
+  }
+
   if (!data) return null;
   return (
     <div className="grid lg:grid-cols-[2fr,1fr] gap-10 min-h-screen">
       <div className="">
         <div className="relative aspect-video mb-5">
-          {data.intro_url ? (
+          {data.intro_url && videoId ? (
             <>
               <iframe
                 width="702"
