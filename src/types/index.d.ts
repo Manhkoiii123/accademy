@@ -26,5 +26,6 @@ export type TCreateCourseParams = {
 export type TUpdateCourseParams = {
   slug: string;
   updateData: Partial<ICourse>; // dùng partial biến all các cái trong iCO thành ko bắt buộc
+  path?: string;
 };
 export { TActiveLinkProps, TMenuItem, TCreateUserParams };

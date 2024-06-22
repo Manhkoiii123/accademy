@@ -53,7 +53,7 @@ export async function updateCourse(params: TUpdateCourseParams) {
     await Course.findOneAndUpdate({ slug: params.slug }, params.updateData, {
       new: true, // lưu cái mới nhất vào
     });
-    revalidatePath("/"); //muốn ở home refetch dữ liệu mới => dùng cái này
+    revalidatePath(params.path || "/"); //muốn ở home refetch dữ liệu mới => dùng cái này
     return {
       success: true,
       message: "Update course successfully",
