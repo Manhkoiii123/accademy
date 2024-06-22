@@ -6,6 +6,12 @@ import { getCourseBySlug } from "@/lib/actions/course.actions";
 import { ECourseStatus } from "@/types/enums";
 import Image from "next/image";
 import React from "react";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 const page = async ({ params }: { params: { slug: string } }) => {
   const data = await getCourseBySlug({ slug: params.slug });
@@ -19,7 +25,7 @@ const page = async ({ params }: { params: { slug: string } }) => {
   if (!data) return null;
   if (data.status !== ECourseStatus.APPROVED) return <PageNotFound />;
   return (
-    <div className="grid lg:grid-cols-[2fr,1fr] gap-10 min-h-screen">
+    <div className="grid lg:pb-0 pb-20 lg:grid-cols-[2fr,1fr] gap-10 min-h-screen">
       <div className="">
         <div className="relative aspect-video mb-5">
           {data.intro_url && videoId ? (
@@ -50,9 +56,9 @@ const page = async ({ params }: { params: { slug: string } }) => {
           <div className="leading-normal">{data.desc}</div>
         </BoxSection>
         <BoxSection title="Thông tin khóa học">
-          <div className="grid grid-cols-4 gap-5 mt-5">
+          <div className="grid  lg:grid-cols-4 gap-5 mt-5">
             <BoxInfo title="Bài học">100</BoxInfo>
-            <BoxInfo title="Lượt xem">{data.views}</BoxInfo>
+            <BoxInfo title="Lượt xem">{data.views.toLocaleString()}</BoxInfo>
             <BoxInfo title="Trình độ">{courseLevelTitle[data.level]}</BoxInfo>
             <BoxInfo title="Thời lượng">100h45p</BoxInfo>
           </div>
@@ -85,8 +91,8 @@ const page = async ({ params }: { params: { slug: string } }) => {
         <BoxSection title="Lợi ích">
           {data.info.benefits.map((r, index) => {
             return (
-              <div key={index} className="mb-3 flex items-center gap-2">
-                <span className="flex-shrink-0 size-5 bg-primary text-white p-1 rounded flex items-center justify-center">
+              <div key={index} className="mb-3 flex items-start gap-2">
+                <span className="flex-shrink-0 size-5 bg-primary text-white p-1 rounded flex items-center justify-center ">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
@@ -109,10 +115,17 @@ const page = async ({ params }: { params: { slug: string } }) => {
         </BoxSection>
         <BoxSection title="Q & A">
           {data.info.qa.map((qa, index) => (
-            <div key={index}>
-              <div>{qa.question}</div>
-              <div>{qa.answer}</div>
-            </div>
+            <Accordion key={index} type="single" collapsible className="mb-3">
+              <AccordionItem value={qa.question}>
+                <AccordionTrigger>{qa.question}</AccordionTrigger>
+                <AccordionContent>{qa.answer}</AccordionContent>
+              </AccordionItem>
+            </Accordion>
+
+            // <div key={index}>
+            //   <div>{qa.question}</div>
+            //   <div>{qa.answer}</div>
+            // </div>
           ))}
         </BoxSection>
       </div>

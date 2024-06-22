@@ -82,14 +82,33 @@ const CourseManage = ({ courses }: { courses: ICourse[] }) => {
     }
   };
   return (
-    <div>
-      <div className="flex items-center justify-between mb-10">
+    <>
+      <Link
+        href={"/manage/course/new"}
+        className="size-10 rounded-full bg-primary flex items-center justify-center text-white fixed right-5 bottom-5 animate-bounce"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          strokeWidth={1.5}
+          stroke="currentColor"
+          className="w-6 h-6"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M12 4.5v15m7.5-7.5h-15"
+          />
+        </svg>
+      </Link>
+      <div className="flex flex-col lg:flex-row gap-5 lg:items-center justify-between mb-10">
         <Heading>Quản lí khóa học</Heading>
-        <div className="w-[500px]">
+        <div className="lg:w-[500px] w-full">
           <Input type="text" placeholder="Tìm kiếm" />
         </div>
       </div>
-      <Table>
+      <Table className="table-responsive">
         <TableHeader>
           <TableRow>
             <TableHead>Thông tin</TableHead>
@@ -113,7 +132,9 @@ const CourseManage = ({ courses }: { courses: ICourse[] }) => {
                         className="flex-shrink-0 size-16 rounded-lg object-cover"
                       />
                       <div className="flex flex-col gap-1">
-                        <h3 className="font-bold text-base">{c.title}</h3>
+                        <h3 className="font-bold text-sm lg:text-base whitespace-nowrap">
+                          {c.title}
+                        </h3>
                         <h4 className="text-sm text-slate-500">
                           {new Date(c.created_at).toLocaleDateString("vi-VI")}
                         </h4>
@@ -121,7 +142,7 @@ const CourseManage = ({ courses }: { courses: ICourse[] }) => {
                     </div>
                   </TableCell>
                   <TableCell>
-                    <span className="font-bold text-base">
+                    <span className="font-bold text-sm lg:text-base">
                       {c.price.toLocaleString()}đ
                     </span>
                   </TableCell>
@@ -209,7 +230,7 @@ const CourseManage = ({ courses }: { courses: ICourse[] }) => {
           </svg>
         </button>
       </div>
-    </div>
+    </>
   );
 };
 
