@@ -1,6 +1,9 @@
+import PageNotFound from "@/app/not-found";
 import { IconClock, IconPlay, IconStudy, IconUsers } from "@/components/icons";
 import { Button } from "@/components/ui/button";
+import { courseLevelTitle } from "@/constants";
 import { getCourseBySlug } from "@/lib/actions/course.actions";
+import { ECourseStatus } from "@/types/enums";
 import Image from "next/image";
 import React from "react";
 
@@ -14,6 +17,7 @@ const page = async ({ params }: { params: { slug: string } }) => {
   }
 
   if (!data) return null;
+  if (data.status !== ECourseStatus.APPROVED) return <PageNotFound />;
   return (
     <div className="grid lg:grid-cols-[2fr,1fr] gap-10 min-h-screen">
       <div className="">
@@ -32,9 +36,7 @@ const page = async ({ params }: { params: { slug: string } }) => {
           ) : (
             <Image
               alt="image course"
-              src={
-                "https://plus.unsplash.com/premium_photo-1682787494977-d013bb5a8773?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-              }
+              src={data.image}
               fill
               className="w-full h-full object-cover rounded-lg"
               sizes="@media (min-width:640px) 300px, 100vw"
@@ -51,7 +53,7 @@ const page = async ({ params }: { params: { slug: string } }) => {
           <div className="grid grid-cols-4 gap-5 mt-5">
             <BoxInfo title="Bài học">100</BoxInfo>
             <BoxInfo title="Lượt xem">{data.views}</BoxInfo>
-            <BoxInfo title="Trình độ">Trung bình</BoxInfo>
+            <BoxInfo title="Trình độ">{courseLevelTitle[data.level]}</BoxInfo>
             <BoxInfo title="Thời lượng">100h45p</BoxInfo>
           </div>
         </BoxSection>
@@ -115,7 +117,7 @@ const page = async ({ params }: { params: { slug: string } }) => {
         </BoxSection>
       </div>
       <div className="">
-        <div className="bg-white rounded-lg p-5">
+        <div className="bg-white rounded-lg p-5 dark:bg-grayDarker">
           <div className="flex items-center gap-2 mb-3">
             <strong className="text-primary text-xl font-bold">
               {data.price}
@@ -176,9 +178,9 @@ function BoxInfo({
   children: React.ReactNode;
 }) {
   return (
-    <div className="bg-white rounded-lg p-5">
-      <h4 className="text-sm text-slate-400 font-normal">{title}</h4>
-      <h3 className="font-bold">{children}</h3>
+    <div className="bg-white rounded-lg p-5 dark:bg-grayDarker">
+      <h4 className="text-sm text-slate-400 font-normal mb-2">{title}</h4>
+      <h3 className="font-bold dark:text-white">{children}</h3>
     </div>
   );
 }

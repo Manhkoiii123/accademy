@@ -1,5 +1,5 @@
 import type { Config } from "tailwindcss";
-
+import { withUt } from "uploadthing/tw";
 const config: Config = {
   // để thế này để config ăn ở all các trang
   darkMode: ["class"],
@@ -38,4 +38,4 @@ const config: Config = {
   },
   plugins: [require("tailwindcss-animate")],
 };
-export default config;
+export default withUt(config);
