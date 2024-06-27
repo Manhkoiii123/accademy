@@ -29,4 +29,28 @@ export type TUpdateCourseParams = {
   updateData: Partial<ICourse>; // dùng partial biến all các cái trong iCO thành ko bắt buộc
   path?: string;
 };
+export interface TCourseUpdateParams extends Omit<ICourse, "lectures"> {
+  lectures: TUpdateCourseLecture[];
+}
+export type TUpdateCourseLecture = {
+  _id: string;
+  title: string;
+  lessons: ILesson[];
+};
+//lectures
+export type TCreateLectureParams = {
+  course: string;
+  title?: string;
+  order?: number;
+  path?: string;
+};
+export type TUpdateLectureParams = {
+  lectureId: string;
+  updateData: {
+    title?: string;
+    order?: number;
+    _destroy?: boolean;
+    path?: string;
+  };
+};
 export { TActiveLinkProps, TMenuItem, TCreateUserParams };
