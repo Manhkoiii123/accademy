@@ -63,6 +63,29 @@ const page = async ({ params }: { params: { slug: string } }) => {
             <BoxInfo title="Thời lượng">100h45p</BoxInfo>
           </div>
         </BoxSection>
+        {data.lectures.length > 0 && (
+          <BoxSection title="Nội dung khóa học">
+            <div className="flex flex-col gap-5">
+              {data.lectures.map((lecture, index) => (
+                <Accordion
+                  collapsible
+                  key={lecture._id}
+                  type="single"
+                  className="w-full"
+                >
+                  <AccordionItem value={lecture._id}>
+                    <AccordionTrigger>
+                      <div className="flex items-center gap-3 justify-between w-full pr-5">
+                        <div>{lecture.title}</div>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent>hello</AccordionContent>
+                  </AccordionItem>
+                </Accordion>
+              ))}
+            </div>
+          </BoxSection>
+        )}
         <BoxSection title="Yêu cầu">
           {data.info.requirements.map((r, index) => {
             return (
@@ -121,11 +144,6 @@ const page = async ({ params }: { params: { slug: string } }) => {
                 <AccordionContent>{qa.answer}</AccordionContent>
               </AccordionItem>
             </Accordion>
-
-            // <div key={index}>
-            //   <div>{qa.question}</div>
-            //   <div>{qa.answer}</div>
-            // </div>
           ))}
         </BoxSection>
       </div>
