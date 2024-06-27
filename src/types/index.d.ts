@@ -1,4 +1,5 @@
 import { ICourse } from "@/database/course.modal";
+import { ILesson } from "@/database/lesson.modal";
 
 type TActiveLinkProps = {
   url: string;
@@ -53,4 +54,27 @@ export type TUpdateLectureParams = {
     path?: string;
   };
 };
+
+//lesson
+export type TCreateLessonParams = {
+  lecture: string;
+  course: string;
+  title?: string;
+  order?: number;
+  path?: string;
+  slug?: string;
+};
+export type TUpdateLessonParams = {
+  lessonId: string;
+  updateData: {
+    _destroy?: boolean;
+    title?: string;
+    slug?: string;
+    duration?: number;
+    video_url?: string;
+    content?: string;
+  };
+  path?: string;
+};
+
 export { TActiveLinkProps, TMenuItem, TCreateUserParams };
