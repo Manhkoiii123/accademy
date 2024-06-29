@@ -1,7 +1,7 @@
 "use server";
 import Course from "@/database/course.modal";
 import Lecture from "@/database/lecture.modal";
-import Lesson from "@/database/lesson.modal";
+import Lesson, { ILesson } from "@/database/lesson.modal";
 import { connectToDatabase } from "@/lib/mongoose";
 import { TCreateLessonParams, TUpdateLessonParams } from "@/types";
 import { revalidatePath } from "next/cache";
@@ -39,5 +39,25 @@ export async function updateLesson(params: TUpdateLessonParams) {
     return {
       success: true,
     };
-  } catch (error) {}
+  } catch (error) {
+    console.log("🚀 ~ updateLesson ~ error:", error);
+  }
+}
+export async function getLessonBySlug({
+  slug,
+  course,
+}: {
+  slug: string;
+  course: string;
+}): Promise<ILesson | undefined> {
+  try {
+    connectToDatabase();
+    const findLesson = await Lesson.findOne({
+      slug,
+      course,
+    });
+    return findLesson;
+  } catch (error) {
+    console.log("🚀 ~ getLessonBySlug ~ error:", error);
+  }
 }

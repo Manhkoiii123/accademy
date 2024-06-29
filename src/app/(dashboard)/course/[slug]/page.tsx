@@ -79,7 +79,22 @@ const page = async ({ params }: { params: { slug: string } }) => {
                         <div>{lecture.title}</div>
                       </div>
                     </AccordionTrigger>
-                    <AccordionContent>hello</AccordionContent>
+                    <AccordionContent className="!bg-transparent border-none p-0">
+                      <div className="flex flex-col gap-3">
+                        {lecture.lessons.map((l) => (
+                          <div
+                            key={l._id}
+                            className="flex items-center gap-3 bgDarkMode border text-sm font-medium borderDarkMode rounded-lg p-3"
+                          >
+                            <IconPlay className="size-4" />
+                            <h4>{l.title}</h4>
+                            <span className="ml-auto text-xs font-font-semibold">
+                              {l.duration} phút
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </AccordionContent>
                   </AccordionItem>
                 </Accordion>
               ))}
