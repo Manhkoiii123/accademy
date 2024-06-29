@@ -1,8 +1,18 @@
+import ButtonNavigateLesson from "@/app/(dashboard)/[course]/lesson/component/ButtonNavigateLesson";
 import PageNotFound from "@/app/not-found";
+import Heading from "@/components/common/Heading";
 import { IconLeftArrow, IconRightArrow } from "@/components/icons";
+import LessonItem from "@/components/lesson/LessonItem";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { getCourseBySlug } from "@/lib/actions/course.actions";
-import { getLessonBySlug } from "@/lib/actions/lession.actions";
+import { findAllLessons, getLessonBySlug } from "@/lib/actions/lession.actions";
+import { useRouter } from "next/navigation";
 import React from "react";
 
 const page = async ({
@@ -17,11 +27,20 @@ const page = async ({
   const course = params.course;
   const slug = searchParams.slug;
   const findcourse = await getCourseBySlug({ slug: course });
+  const courseId = findcourse?._id.toString();
   if (!findcourse || !slug) return <PageNotFound />;
   const lessonDetail = await getLessonBySlug({
     slug,
-    course: findcourse?._id.toString(),
+    course: courseId || "",
   });
+  const lessonList = await findAllLessons({ course: courseId || "" });
+  const currentLessonIndex =
+    lessonList?.findIndex(
+      // (item) => item._id.toString() === lessonDetail?._id.toString()
+      (item) => item.slug === lessonDetail?.slug
+    ) || 0;
+  const nextLesson = lessonList?.[currentLessonIndex + 1];
+  const prevLesson = lessonList?.[currentLessonIndex - 1];
   if (!lessonDetail) return <PageNotFound />;
   let videoId;
   if (lessonDetail?.video_url) {
@@ -30,8 +49,9 @@ const page = async ({
     );
     videoId = urlParams.get("v");
   }
+  const lectures = findcourse.lectures || [];
   return (
-    <div className="grid lg:pb-0 pb-20 lg:grid-cols-[2fr,1fr] gap-10 min-h-screen">
+    <div className="grid lg:pb-0 pb-20 xl:grid-cols-[minmax(0,2fr),minmax(0,1fr)] gap-10 min-h-screen items-start">
       <div>
         <div className="relative mb-5 aspect-video">
           <iframe
@@ -41,18 +61,61 @@ const page = async ({
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
           />
         </div>
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mb-5">
           <div className="flex gap-3">
-            <Button className="size-10 p-3">
-              <IconLeftArrow />
-            </Button>
-            <Button className="size-10 p-3">
-              <IconRightArrow />
-            </Button>
+            <ButtonNavigateLesson
+              course={course}
+              prevLesson={prevLesson}
+              type="prev"
+            />
+
+            <ButtonNavigateLesson
+              course={course}
+              nextLesson={nextLesson}
+              type="next"
+            />
           </div>
         </div>
+        <Heading classname="my-10 ">{lessonDetail.title}</Heading>
+        <div className="p-5 rounded-lg bgDarkMode border borderDarkMode entry-content">
+          <div
+            dangerouslySetInnerHTML={{ __html: lessonDetail.content || "" }}
+          />
+        </div>
       </div>
-      <div></div>
+
+      <div className="sticky top-10 right-0 max-h-[calc(100svh-100px)] overflow-y-auto">
+        <div className="flex flex-col gap-5">
+          {lectures.map((lecture, index) => (
+            <Accordion
+              collapsible
+              key={lecture._id}
+              type="single"
+              className="w-full"
+            >
+              <AccordionItem value={lecture._id}>
+                <AccordionTrigger>
+                  <div className="flex items-center gap-3 justify-between w-full pr-5">
+                    <div className="line-clamp-1">{lecture.title}</div>
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent className="!bg-transparent border-none p-0">
+                  <div className="flex flex-col gap-3">
+                    {lecture.lessons.map((l) => (
+                      <LessonItem
+                        course={course}
+                        key={l._id}
+                        l={l}
+                        isActive={l.slug === slug}
+                      />
+                    ))}
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+          ))}
+        </div>
+      </div>
     </div>
   );
 };

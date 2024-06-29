@@ -14,3 +14,4 @@ export { default as IconCheck } from "./IconCheck";
 export { default as IconCancel } from "./IconCancel";
 export { default as IconLeftArrow } from "./IconLeftArrow";
 export { default as IconRightArrow } from "./IconRightArrow";
+export { default as IconWatch } from "./IconWatch";
