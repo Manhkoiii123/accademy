@@ -61,3 +61,18 @@ export async function getLessonBySlug({
     console.log("🚀 ~ getLessonBySlug ~ error:", error);
   }
 }
+export async function findAllLessons({
+  course,
+}: {
+  course: string;
+}): Promise<ILesson[] | undefined> {
+  try {
+    connectToDatabase();
+    const lessons = await Lesson.find({
+      course,
+    });
+    return JSON.parse(JSON.stringify(lessons));
+  } catch (error) {
+    console.log("🚀 ~ getLessonBySlug ~ error:", error);
+  }
+}
