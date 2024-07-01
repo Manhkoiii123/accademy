@@ -11,7 +11,7 @@ export async function createUser(
 ): Promise<TCreateUserParams | undefined> {
   try {
     connectToDatabase();
-    const newUser: TCreateUserParams = await User.create(params);
+    const newUser = await User.create(params);
     return newUser;
   } catch (error) {}
 }
