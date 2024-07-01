@@ -1,4 +1,5 @@
 import ButtonNavigateLesson from "@/app/(dashboard)/[course]/lesson/component/ButtonNavigateLesson";
+import LessonSaveUrl from "@/app/(dashboard)/[course]/lesson/component/LessonSaveUrl";
 import PageNotFound from "@/app/not-found";
 import Heading from "@/components/common/Heading";
 import { IconLeftArrow, IconRightArrow } from "@/components/icons";
@@ -60,6 +61,7 @@ const page = async ({
 
   return (
     <div className="grid lg:pb-0 pb-20 xl:grid-cols-[minmax(0,2fr),minmax(0,1fr)] gap-10 min-h-screen items-start">
+      <LessonSaveUrl url={`/${course}/lesson?slug=${slug}`} course={course} />
       <div>
         <div className="relative mb-5 aspect-video">
           <iframe
@@ -93,7 +95,6 @@ const page = async ({
           </div>
         )}
       </div>
-
       <div className="sticky top-10 right-0 max-h-[calc(100svh-100px)] overflow-y-auto">
         <div className="h-3 w-full rounded-full border borderDarkMode bgDarkMode mb-2">
           <div

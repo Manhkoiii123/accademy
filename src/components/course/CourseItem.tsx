@@ -4,7 +4,15 @@ import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 
-const CourseItem = ({ data }: { data: ICourse }) => {
+const CourseItem = ({
+  data,
+  cta,
+  url,
+}: {
+  data: ICourse;
+  cta?: string;
+  url?: string;
+}) => {
   const courseInfo = [
     {
       title: data.views,
@@ -61,10 +69,10 @@ const CourseItem = ({ data }: { data: ICourse }) => {
         </div>
 
         <Link
-          href={`/course/${data.slug}`}
-          className="flex w-full mt-10 items-center justify-center rounded-lg text-white font-semibold bg-primary h-12"
+          href={url ? url : `/course/${data.slug}`}
+          className="flex w-full mt-10 items-center justify-center rounded-lg text-white font-semibold bg-primary h-12 button-primary"
         >
-          Xem chi tiết
+          {cta || "Xem chi tiết"}
         </Link>
       </div>
     </div>
