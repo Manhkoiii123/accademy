@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { getCourseBySlug } from "@/lib/actions/course.actions";
+import { getHistory } from "@/lib/actions/history.actions";
 import { findAllLessons, getLessonBySlug } from "@/lib/actions/lession.actions";
 import { useRouter } from "next/navigation";
 import React from "react";
@@ -34,6 +35,7 @@ const page = async ({
     course: courseId || "",
   });
   const lessonList = await findAllLessons({ course: courseId || "" });
+
   const currentLessonIndex =
     lessonList?.findIndex(
       // (item) => item._id.toString() === lessonDetail?._id.toString()
@@ -50,6 +52,12 @@ const page = async ({
     videoId = urlParams.get("v");
   }
   const lectures = findcourse.lectures || [];
+
+  const histories = await getHistory({ course: courseId! });
+
+  const completePercent =
+    ((histories?.length || 0) / (lessonList?.length || 1)) * 100;
+
   return (
     <div className="grid lg:pb-0 pb-20 xl:grid-cols-[minmax(0,2fr),minmax(0,1fr)] gap-10 min-h-screen items-start">
       <div>
@@ -77,14 +85,24 @@ const page = async ({
           </div>
         </div>
         <Heading classname="my-10 ">{lessonDetail.title}</Heading>
-        <div className="p-5 rounded-lg bgDarkMode border borderDarkMode entry-content">
-          <div
-            dangerouslySetInnerHTML={{ __html: lessonDetail.content || "" }}
-          />
-        </div>
+        {lessonDetail.content && (
+          <div className="p-5 rounded-lg bgDarkMode border borderDarkMode entry-content">
+            <div
+              dangerouslySetInnerHTML={{ __html: lessonDetail.content || "" }}
+            />
+          </div>
+        )}
       </div>
 
       <div className="sticky top-10 right-0 max-h-[calc(100svh-100px)] overflow-y-auto">
+        <div className="h-3 w-full rounded-full border borderDarkMode bgDarkMode mb-2">
+          <div
+            className=" h-full rounded-full bg-secondary transition-all"
+            style={{
+              width: `${completePercent}%`,
+            }}
+          ></div>
+        </div>
         <div className="flex flex-col gap-5">
           {lectures.map((lecture, index) => (
             <Accordion
@@ -105,8 +123,11 @@ const page = async ({
                       <LessonItem
                         course={course}
                         key={l._id}
-                        l={l}
+                        l={l ? JSON.parse(JSON.stringify(l)) : {}}
                         isActive={l.slug === slug}
+                        isChecked={histories?.some(
+                          (el) => el.lesson.toString() === l._id.toString()
+                        )}
                       />
                     ))}
                   </div>
