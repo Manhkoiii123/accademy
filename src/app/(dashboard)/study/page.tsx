@@ -1,6 +1,4 @@
 import StudyCourse from "@/app/(dashboard)/study/components/StudyCourse";
-import { Coursegrid } from "@/components/common";
-import CourseItem from "@/components/course/CourseItem";
 import Heading from "@/components/typography/Heading";
 import { getUserCourse } from "@/lib/actions/user.actions";
 import React from "react";

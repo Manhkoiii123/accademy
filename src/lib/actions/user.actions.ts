@@ -8,12 +8,11 @@ import { connectToDatabase } from "@/lib/mongoose";
 import { TCreateUserParams } from "@/types";
 import { auth } from "@clerk/nextjs/server";
 
-export async function createUser(
-  params: TCreateUserParams
-): Promise<TCreateUserParams | undefined> {
+export async function createUser(params: TCreateUserParams) {
   try {
     connectToDatabase();
     const newUser = await User.create(params);
+    console.log("🚀 ~ createUser ~ newUser:", newUser);
     return newUser;
   } catch (error) {
     console.log("🚀 ~ error:", error);
