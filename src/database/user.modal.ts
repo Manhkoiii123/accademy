@@ -8,9 +8,9 @@ export interface IUser extends Document {
   username: string;
   email: string;
   avatar: string;
+  courses: Schema.Types.ObjectId[];
   status: EUserStatus;
   role: EUserRole;
-  courses: Schema.Types.ObjectId[];
   created_at: Date;
 }
 const userSchema = new Schema<IUser>({
@@ -36,7 +36,7 @@ const userSchema = new Schema<IUser>({
   courses: [
     {
       type: Schema.Types.ObjectId,
-      ref: "Course", //liên kết tới bảng khác
+      ref: "Course",
     },
   ],
   created_at: {
@@ -45,18 +45,14 @@ const userSchema = new Schema<IUser>({
   },
   role: {
     type: String,
-    enum: Object.values(EUserRole), // lấy 1 trong cái các EUserRole
+    enum: Object.values(EUserRole),
     default: EUserRole.USER,
   },
   status: {
     type: String,
-    enum: Object.values(EUserStatus), // lấy 1 trong cái các EUserRole
+    enum: Object.values(EUserStatus),
     default: EUserStatus.ACTIVE,
   },
 });
-const User = models.User || model("User", userSchema);
-//khai báo modal trong mg
-// models trong mg chứa hết tất cả các models đã được đăng kí trước đó
-// như vậy dòng 52 có ý nghĩa là trong các model trước có user rồi thì dùng cái đó
-// nếu chưa thì chạy vào model("User", userSchema) => model truyền vòa 2 cái (tên, schema) => đăng kí 1 cái model
+const User = models.User || model<IUser>("User", userSchema);
 export default User;

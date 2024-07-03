@@ -15,7 +15,9 @@ export async function createUser(
     connectToDatabase();
     const newUser = await User.create(params);
     return newUser;
-  } catch (error) {}
+  } catch (error) {
+    console.log("🚀 ~ error:", error);
+  }
 }
 
 export async function getUserInfo({
