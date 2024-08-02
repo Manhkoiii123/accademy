@@ -31,7 +31,7 @@ const CourseItem = ({
     <div className="bg-white border dark:bg-grayDarker dark:border-opacity-10 border-gray-200 p-4 rounded-2xl flex flex-col justify-between">
       <div>
         <Link
-          href={`/course/${data.slug}`}
+          href={url ? url : `/course/${data.slug}`}
           className="block h-[180px] relative"
         >
           <Image
