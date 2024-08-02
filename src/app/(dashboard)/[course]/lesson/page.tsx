@@ -14,6 +14,8 @@ import { Button } from "@/components/ui/button";
 import { getCourseBySlug } from "@/lib/actions/course.actions";
 import { getHistory } from "@/lib/actions/history.actions";
 import { findAllLessons, getLessonBySlug } from "@/lib/actions/lession.actions";
+import { getUserInfo } from "@/lib/actions/user.actions";
+import { auth } from "@clerk/nextjs/server";
 import { useRouter } from "next/navigation";
 import React from "react";
 
@@ -26,10 +28,16 @@ const page = async ({
     slug: string;
   };
 }) => {
+  const { userId } = auth();
+  if (!userId) return <PageNotFound />;
   const course = params.course;
   const slug = searchParams.slug;
   const findcourse = await getCourseBySlug({ slug: course });
   const courseId = findcourse?._id.toString();
+  const findUser = await getUserInfo({ userId });
+  if (!findUser) return <PageNotFound />;
+  
+  if (!findUser.courses.includes(courseId as any)) return <PageNotFound />;
   if (!findcourse || !slug) return <PageNotFound />;
   const lessonDetail = await getLessonBySlug({
     slug,
@@ -39,7 +47,6 @@ const page = async ({
 
   const currentLessonIndex =
     lessonList?.findIndex(
-      // (item) => item._id.toString() === lessonDetail?._id.toString()
       (item) => item.slug === lessonDetail?.slug
     ) || 0;
   const nextLesson = lessonList?.[currentLessonIndex + 1];
