@@ -13,6 +13,15 @@ const CourseItem = ({
   cta?: string;
   url?: string;
 }) => {
+  console.log({
+    cta,
+    url,
+    a: url
+      ? url
+      : cta === "Tiếp tục học"
+      ? `/${data.slug}/lesson`
+      : `/course/${data.slug}`,
+  });
   const courseInfo = [
     {
       title: data.views,
@@ -31,7 +40,13 @@ const CourseItem = ({
     <div className="bg-white border dark:bg-grayDarker dark:border-opacity-10 border-gray-200 p-4 rounded-2xl flex flex-col justify-between">
       <div>
         <Link
-          href={url ? url : `/course/${data.slug}`}
+          href={
+            url
+              ? url
+              : cta === "Tiếp tục học"
+              ? `/${data.slug}/lesson`
+              : `/course/${data.slug}`
+          }
           className="block h-[180px] relative"
         >
           <Image
@@ -69,7 +84,13 @@ const CourseItem = ({
         </div>
 
         <Link
-          href={url ? url : `/course/${data.slug}`}
+          href={
+            url
+              ? url
+              : cta === "Tiếp tục học"
+              ? `/${data.slug}/lesson`
+              : `/course/${data.slug}`
+          }
           className="flex w-full mt-10 items-center justify-center rounded-lg text-white font-semibold bg-primary h-12 button-primary"
         >
           {cta || "Xem chi tiết"}
