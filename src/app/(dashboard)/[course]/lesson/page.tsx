@@ -2,7 +2,6 @@ import ButtonNavigateLesson from "@/app/(dashboard)/[course]/lesson/component/Bu
 import LessonSaveUrl from "@/app/(dashboard)/[course]/lesson/component/LessonSaveUrl";
 import PageNotFound from "@/app/not-found";
 import Heading from "@/components/common/Heading";
-import { IconLeftArrow, IconRightArrow } from "@/components/icons";
 import LessonItem from "@/components/lesson/LessonItem";
 import {
   Accordion,
@@ -10,13 +9,11 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Button } from "@/components/ui/button";
 import { getCourseBySlug } from "@/lib/actions/course.actions";
 import { getHistory } from "@/lib/actions/history.actions";
-import { findAllLessons, getLessonBySlug } from "@/lib/actions/lession.actions";
+import { findAllLessons } from "@/lib/actions/lession.actions";
 import { getUserInfo } from "@/lib/actions/user.actions";
 import { auth } from "@clerk/nextjs/server";
-import { useRouter } from "next/navigation";
 import React from "react";
 
 const page = async ({
@@ -31,24 +28,19 @@ const page = async ({
   const { userId } = auth();
   if (!userId) return <PageNotFound />;
   const course = params.course;
-  const slug = searchParams.slug;
   const findcourse = await getCourseBySlug({ slug: course });
   const courseId = findcourse?._id.toString();
+  const lessonList = await findAllLessons({ course: courseId || "" });
+  const slug = searchParams.slug ? searchParams.slug : lessonList?.[0].slug;
   const findUser = await getUserInfo({ userId });
   if (!findUser) return <PageNotFound />;
-  
-  if (!findUser.courses.includes(courseId as any)) return <PageNotFound />;
-  if (!findcourse || !slug) return <PageNotFound />;
-  const lessonDetail = await getLessonBySlug({
-    slug,
-    course: courseId || "",
-  });
-  const lessonList = await findAllLessons({ course: courseId || "" });
 
+  if (!findUser.courses.includes(courseId as any)) return <PageNotFound />;
+  // if (!findcourse || !slug) return <PageNotFound />;
+  const lessonDetail = lessonList?.find((el) => el.slug === slug);
+  if (!lessonDetail) return null;
   const currentLessonIndex =
-    lessonList?.findIndex(
-      (item) => item.slug === lessonDetail?.slug
-    ) || 0;
+    lessonList?.findIndex((item) => item.slug === lessonDetail?.slug) || 0;
   const nextLesson = lessonList?.[currentLessonIndex + 1];
   const prevLesson = lessonList?.[currentLessonIndex - 1];
   if (!lessonDetail) return <PageNotFound />;
@@ -59,7 +51,7 @@ const page = async ({
     );
     videoId = urlParams.get("v");
   }
-  const lectures = findcourse.lectures || [];
+  const lectures = findcourse?.lectures || [];
 
   const histories = await getHistory({ course: courseId! });
 

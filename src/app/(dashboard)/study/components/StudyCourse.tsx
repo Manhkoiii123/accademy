@@ -2,7 +2,6 @@
 import { Coursegrid } from "@/components/common";
 import CourseItem from "@/components/course/CourseItem";
 import { ICourse } from "@/database/course.modal";
-import { findAllLessons } from "@/lib/actions/lession.actions";
 import React from "react";
 
 const StudyCourse = ({
