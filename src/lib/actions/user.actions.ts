@@ -12,7 +12,6 @@ export async function createUser(params: TCreateUserParams) {
   try {
     connectToDatabase();
     const newUser = await User.create(params);
-    console.log("🚀 ~ createUser ~ newUser:", newUser);
     return newUser;
   } catch (error) {
     console.log("🚀 ~ error:", error);

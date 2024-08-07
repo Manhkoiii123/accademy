@@ -76,3 +76,16 @@ export async function findAllLessons({
     console.log("🚀 ~ getLessonBySlug ~ error:", error);
   }
 }
+export async function countLessonByCorseId({
+  courseId,
+}: {
+  courseId: string;
+}): Promise<number | undefined> {
+  try {
+    connectToDatabase();
+    const count = await Lesson.countDocuments({ courseId });
+    return count || 0;
+  } catch (error) {
+    console.log("🚀 ~ getLessonBySlug ~ error:", error);
+  }
+}
