@@ -1,8 +1,6 @@
 import LoadingOutline from "@/app/(dashboard)/[course]/lesson/@outline/Loadingoutline";
 import LoadingPlayer from "@/app/(dashboard)/[course]/lesson/@player/LoadingPlayer";
 import PageNotFound from "@/app/not-found";
-import { getCourseBySlug } from "@/lib/actions/course.actions";
-import { findAllLessons } from "@/lib/actions/lession.actions";
 import { getUserInfo } from "@/lib/actions/user.actions";
 import { auth } from "@clerk/nextjs/server";
 import React, { Suspense } from "react";
