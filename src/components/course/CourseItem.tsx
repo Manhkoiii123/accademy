@@ -13,15 +13,6 @@ const CourseItem = ({
   cta?: string;
   url?: string;
 }) => {
-  console.log({
-    cta,
-    url,
-    a: url
-      ? url
-      : cta === "Tiếp tục học"
-      ? `/${data.slug}/lesson`
-      : `/course/${data.slug}`,
-  });
   const courseInfo = [
     {
       title: data.views,
