@@ -1,10 +1,10 @@
 "use client";
 
 import { ILesson } from "@/database/lesson.modal";
+import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import ReactPlayer from "react-player";
-import Swal from "sweetalert2";
 
 const VideoPlayer = ({
   videoId,
@@ -17,34 +17,46 @@ const VideoPlayer = ({
 }) => {
   const router = useRouter();
   const [isVideoEnded, setIsVideoEnded] = useState(false);
-
+  const videoEndedRef = useRef(false);
+  useEffect(() => {
+    setIsVideoEnded(false);
+    videoEndedRef.current = false;
+  }, [videoId]);
   useEffect(() => {
     if (isVideoEnded && nextLesson) {
-      Swal.fire({
-        title: "Video đã kết thúc!",
-        text: "Bạn có muốn chuyển sang bài tiếp theo không?",
-        icon: "info",
-        showCancelButton: true,
-        confirmButtonText: "OK",
-        cancelButtonText: "Hủy",
-      }).then((result) => {
-        if (result.isConfirmed) {
-          router.push(`/${course}/lesson?slug=${nextLesson?.slug}`);
-          setIsVideoEnded(false);
-        }
-      });
+      const timer = setTimeout(() => {
+        router.push(`/${course}/lesson?slug=${nextLesson?.slug}`);
+        setIsVideoEnded(false);
+      }, 5000);
+
+      return () => clearTimeout(timer);
     }
-  }, [isVideoEnded, nextLesson, router, course]);
+  }, [isVideoEnded, nextLesson, course, router]);
+
+  const handleVideoEnded = () => {
+    if (!videoEndedRef.current) {
+      videoEndedRef.current = true;
+      setIsVideoEnded(true);
+    }
+  };
 
   return (
-    <ReactPlayer
-      url={`https://www.youtube.com/watch?v=${videoId}`}
-      width="100%"
-      height="100%"
-      playing={true}
-      onEnded={() => setIsVideoEnded(true)}
-      controls={true}
-    />
+    <>
+      <div
+        className={cn(
+          "absolute right-0 top-0 z-10 h-1.5 bg-gradient-to-r from-primary to-secondary",
+          isVideoEnded ? "animate-bar" : ""
+        )}
+      />
+      <ReactPlayer
+        url={`https://www.youtube.com/watch?v=${videoId}`}
+        width="100%"
+        height="100%"
+        playing={true}
+        onEnded={handleVideoEnded}
+        controls={true}
+      />
+    </>
   );
 };
 
