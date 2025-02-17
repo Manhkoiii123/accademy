@@ -6,6 +6,9 @@ const config: Config = {
   content: ["./src/**/*.{js,ts,jsx,tsx,mdx}"],
   theme: {
     extend: {
+      screens: {
+        "3xl": "1900px",
+      },
       colors: {
         primary: "#615EFC",
         secondary: "#2979ff",

@@ -196,7 +196,7 @@ const CourseManage = ({ courses }: { courses: ICourse[] }) => {
             })}
         </TableBody>
       </Table>
-      <div className="flex justify-end gap-3 mt-5">
+      {/* <div className="flex justify-end gap-3 mt-5">
         <button type="button" className={commonClassNames.paginationButton}>
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -229,7 +229,7 @@ const CourseManage = ({ courses }: { courses: ICourse[] }) => {
             />
           </svg>
         </button>
-      </div>
+      </div> */}
     </>
   );
 };

@@ -1,4 +1,4 @@
-import LoadingOutline from "@/app/(dashboard)/[course]/lesson/@outline/LoadinngOutline";
+import LoadingOutline from "@/app/(dashboard)/[course]/lesson/@outline/LoadingOutline";
 import LoadingPlayer from "@/app/(dashboard)/[course]/lesson/@player/LoadingPlayer";
 import PageNotFound from "@/app/not-found";
 import { getUserInfo } from "@/lib/actions/user.actions";
