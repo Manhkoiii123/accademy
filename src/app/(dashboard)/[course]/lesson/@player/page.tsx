@@ -1,3 +1,4 @@
+import VideoPlayer from "@/app/(dashboard)/[course]/lesson/@player/VideoPlayer";
 import ButtonNavigateLesson from "@/app/(dashboard)/[course]/lesson/component/ButtonNavigateLesson";
 import LessonSaveUrl from "@/app/(dashboard)/[course]/lesson/component/LessonSaveUrl";
 import PageNotFound from "@/app/not-found";
@@ -38,11 +39,10 @@ const page = async ({
     <div>
       <LessonSaveUrl url={`/${course}/lesson?slug=${slug}`} course={course} />
       <div className="relative mb-5 aspect-video">
-        <iframe
-          className="w-full h-full object-fill"
-          src={`https://www.youtube.com/embed/${videoId}`}
-          title="Crazy Scroll Animation Using CSS Only"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        <VideoPlayer
+          videoId={videoId!}
+          nextLesson={nextLesson}
+          course={course}
         />
       </div>
       <div className="flex items-center justify-between mb-5">
