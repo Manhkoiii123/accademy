@@ -2,10 +2,11 @@
 // chạy ở phía server
 "use server";
 
-import { ICourse } from "@/database/course.modal";
+import Course, { ICourse } from "@/database/course.modal";
 import User, { IUser } from "@/database/user.modal";
 import { connectToDatabase } from "@/lib/mongoose";
 import { TCreateUserParams } from "@/types";
+import { ECourseStatus } from "@/types/enums";
 import { auth } from "@clerk/nextjs/server";
 
 export async function createUser(params: TCreateUserParams) {
@@ -39,9 +40,11 @@ export async function getUserCourse(): Promise<ICourse[] | null | undefined> {
   try {
     connectToDatabase();
     const { userId } = auth();
-    const findUser = await User.findOne({ clerkId: userId }).populate(
-      "courses"
-    );
+    const findUser = await User.findOne({ clerkId: userId }).populate({
+      path: "courses",
+      model: Course,
+      match: { status: ECourseStatus.APPROVED },
+    });
     if (!findUser) {
       return null;
     }
