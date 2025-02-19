@@ -1,7 +1,10 @@
 "use client";
 
+import ButtonNavigateLesson from "@/app/(dashboard)/[course]/lesson/component/ButtonNavigateLesson";
+import { Button } from "@/components/ui/button";
 import { ILesson } from "@/database/lesson.modal";
 import { cn } from "@/lib/utils";
+import useGlobalStore from "@/store";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
 import ReactPlayer from "react-player";
@@ -9,14 +12,17 @@ import ReactPlayer from "react-player";
 const VideoPlayer = ({
   videoId,
   nextLesson,
+  prevLesson,
   course,
 }: {
   videoId: string;
   nextLesson?: ILesson;
+  prevLesson?: ILesson;
   course: string;
 }) => {
   const router = useRouter();
   const [isVideoEnded, setIsVideoEnded] = useState(false);
+  const { expandedPlayer, setExpandedPlayer } = useGlobalStore();
   const videoEndedRef = useRef(false);
   useEffect(() => {
     setIsVideoEnded(false);
@@ -56,8 +62,28 @@ const VideoPlayer = ({
         onEnded={handleVideoEnded}
         controls={true}
       />
+      <div className="flex items-center justify-between mt-5">
+        <div className="flex gap-3">
+          <ButtonNavigateLesson
+            course={course}
+            prevLesson={prevLesson}
+            type="prev"
+          />
+
+          <ButtonNavigateLesson
+            course={course}
+            nextLesson={nextLesson}
+            type="next"
+          />
+        </div>
+        <Button onClick={() => setExpandedPlayer(!expandedPlayer)}>
+          {expandedPlayer ? "Mặc định" : "Mở rộng"}
+        </Button>
+      </div>
     </>
   );
 };
 
 export default VideoPlayer;
+
+// 22:14

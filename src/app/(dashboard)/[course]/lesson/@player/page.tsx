@@ -3,6 +3,7 @@ import ButtonNavigateLesson from "@/app/(dashboard)/[course]/lesson/component/Bu
 import LessonSaveUrl from "@/app/(dashboard)/[course]/lesson/component/LessonSaveUrl";
 import PageNotFound from "@/app/not-found";
 import Heading from "@/components/common/Heading";
+import { Button } from "@/components/ui/button";
 import { getCourseBySlug } from "@/lib/actions/course.actions";
 import { findAllLessons } from "@/lib/actions/lession.actions";
 import React from "react";
@@ -42,24 +43,11 @@ const page = async ({
         <VideoPlayer
           videoId={videoId!}
           nextLesson={nextLesson}
+          prevLesson={prevLesson}
           course={course}
         />
       </div>
-      <div className="flex items-center justify-between mb-5">
-        <div className="flex gap-3">
-          <ButtonNavigateLesson
-            course={course}
-            prevLesson={prevLesson}
-            type="prev"
-          />
 
-          <ButtonNavigateLesson
-            course={course}
-            nextLesson={nextLesson}
-            type="next"
-          />
-        </div>
-      </div>
       <Heading classname="my-10 ">{lessonDetail.title}</Heading>
       {lessonDetail.content && (
         <div className="p-5 rounded-lg bgDarkMode border borderDarkMode entry-content">
