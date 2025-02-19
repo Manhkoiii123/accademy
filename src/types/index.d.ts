@@ -30,6 +30,12 @@ export type TUpdateCourseParams = {
   updateData: Partial<ICourse>; // dùng partial biến all các cái trong iCO thành ko bắt buộc
   path?: string;
 };
+export type TGetAllCourseParams = {
+  page: number;
+  limit: number;
+  search?: string;
+  status?: string;
+};
 export interface TCourseUpdateParams extends Omit<ICourse, "lectures"> {
   lectures: TUpdateCourseLecture[];
 }

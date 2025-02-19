@@ -1,9 +1,8 @@
 "use client";
-import React from "react";
+import React, { useCallback } from "react";
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
@@ -14,10 +13,11 @@ import Image from "next/image";
 import { commonClassNames, courseStatus } from "@/constants";
 import { cn } from "@/lib/utils";
 import {
-  IconAdd,
   IconDelete,
   IconEdit,
   IconEye,
+  IconLeftArrow,
+  IconRightArrow,
   IconStudy,
 } from "@/components/icons";
 import Link from "next/link";
@@ -27,8 +27,37 @@ import { updateCourse } from "@/lib/actions/course.actions";
 import { ECourseStatus } from "@/types/enums";
 import { toast } from "react-toastify";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { debounce } from "lodash";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
-const CourseManage = ({ courses }: { courses: ICourse[] }) => {
+const CourseManage = ({
+  courses,
+  totalCount,
+}: {
+  courses: ICourse[];
+  totalCount: number;
+}) => {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const createQueryString = useCallback(
+    (name: string, value: string) => {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set(name, value);
+
+      return params.toString();
+    },
+    [searchParams]
+  );
   const handleDeleteCourse = (slug: string) => {
     Swal.fire({
       title: "Are you sure?",
@@ -81,6 +110,41 @@ const CourseManage = ({ courses }: { courses: ICourse[] }) => {
       console.log("🚀 ~ handleChangeStatus ~ error:", error);
     }
   };
+  const handleSearchCourse = debounce(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const search = e.target.value;
+      const currentQuery = new URLSearchParams(window.location.search);
+      currentQuery.set("search", search);
+      if (currentQuery.has("page")) {
+        currentQuery.delete("page");
+        currentQuery.set("page", "1");
+      }
+      router.push(`${pathname}?${currentQuery.toString()}`);
+    },
+    500
+  );
+
+  const handleSelectStatus = (status: ECourseStatus) => {
+    const currentQuery = new URLSearchParams(window.location.search);
+    currentQuery.set("status", status);
+    if (currentQuery.has("page")) {
+      currentQuery.delete("page");
+      currentQuery.set("page", "1");
+    }
+    router.push(`${pathname}?${currentQuery.toString()}`);
+  };
+
+  const page = searchParams.get("page") || 1;
+  const handleChangePage = (type: "prev" | "next") => {
+    if (type === "prev" && +page === 1) return;
+    if (type === "next" && +page === +Math.ceil(totalCount / 4)) return;
+    router.push(
+      `${pathname}?${createQueryString(
+        "page",
+        type === "prev" ? String(+page - 1) : String(+page + 1)
+      )}`
+    );
+  };
   return (
     <>
       <Link
@@ -104,8 +168,30 @@ const CourseManage = ({ courses }: { courses: ICourse[] }) => {
       </Link>
       <div className="flex flex-col lg:flex-row gap-5 lg:items-center justify-between mb-10">
         <Heading>Quản lí khóa học</Heading>
-        <div className="lg:w-[500px] w-full">
-          <Input type="text" placeholder="Tìm kiếm" />
+        <div className="lg:w-[500px] w-full flex flex-col lg:flex-row gap-2">
+          <Input
+            type="text"
+            placeholder="Tìm kiếm"
+            onChange={(e) => handleSearchCourse(e)}
+          />
+          <Select
+            onValueChange={(value) =>
+              handleSelectStatus(value as ECourseStatus)
+            }
+          >
+            <SelectTrigger className="lg:w-[200px]">
+              <SelectValue placeholder="Chọn trạng thái" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                {courseStatus.map((status) => (
+                  <SelectItem key={status.value} value={status.value}>
+                    {status.title}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
         </div>
       </div>
       <Table className="table-responsive">
@@ -196,40 +282,24 @@ const CourseManage = ({ courses }: { courses: ICourse[] }) => {
             })}
         </TableBody>
       </Table>
-      {/* <div className="flex justify-end gap-3 mt-5">
-        <button type="button" className={commonClassNames.paginationButton}>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={1.5}
-            stroke="currentColor"
-            className="w-4 h-4"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M15.75 19.5L8.25 12l7.5-7.5"
-            />
-          </svg>
+      <div className="flex justify-end gap-3 mt-5">
+        <button
+          type="button"
+          disabled={+page === 1}
+          className={commonClassNames.paginationButton}
+          onClick={() => handleChangePage("prev")}
+        >
+          <IconLeftArrow />
         </button>
-        <button type="button" className={commonClassNames.paginationButton}>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={1.5}
-            stroke="currentColor"
-            className="w-4 h-4"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M8.25 4.5l7.5 7.5-7.5 7.5"
-            />
-          </svg>
+        <button
+          type="button"
+          disabled={+page === +Math.ceil(totalCount / 4)}
+          className={commonClassNames.paginationButton}
+          onClick={() => handleChangePage("next")}
+        >
+          <IconRightArrow />
         </button>
-      </div> */}
+      </div>
     </>
   );
 };

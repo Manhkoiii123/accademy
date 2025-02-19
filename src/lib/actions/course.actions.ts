@@ -6,18 +6,63 @@ import { connectToDatabase } from "@/lib/mongoose";
 import {
   TCourseUpdateParams,
   TCreateCourseParams,
+  TGetAllCourseParams,
   TUpdateCourseParams,
 } from "@/types";
+import { ECourseStatus } from "@/types/enums";
+import { FilterQuery } from "mongoose";
 import { revalidatePath } from "next/cache";
-export async function getAllCourse(): Promise<ICourse[] | undefined> {
+export async function getAllCourse(
+  params?: TGetAllCourseParams
+): Promise<{ courses: ICourse[]; totalCount: number } | undefined> {
   try {
     connectToDatabase();
-    const courses = await Course.find();
-    return courses;
+    const limit = params?.limit || 4;
+    const page = params?.page || 1;
+    const search = params?.search;
+    const status = params?.status;
+    const skip = (page - 1) * limit;
+    const query: FilterQuery<typeof Course> = {};
+
+    if (search) {
+      query.$or = [
+        {
+          title: { $regex: search, $options: "i" }, // Không phân biệt hoa thường
+        },
+      ];
+    }
+    if (status) {
+      query.status = status;
+    }
+
+    const courses = await Course.find(query)
+      .skip(skip)
+      .limit(limit)
+      .sort({ created_at: -1 });
+
+    const totalCount = await Course.countDocuments(query);
+
+    return { courses, totalCount };
   } catch (error) {
     console.log("🚀 ~ getAllCourse ~ error:", error);
   }
 }
+export async function getAllCoursePublic(): Promise<
+  { courses: ICourse[]; totalCount: number } | undefined
+> {
+  try {
+    connectToDatabase();
+    const courses = await Course.find({
+      status: ECourseStatus.APPROVED,
+    });
+    const totalCount = await Course.countDocuments();
+
+    return { courses, totalCount };
+  } catch (error) {
+    console.log("🚀 ~ getAllCourse ~ error:", error);
+  }
+}
+
 export async function getCourseBySlug({
   slug,
 }: {
