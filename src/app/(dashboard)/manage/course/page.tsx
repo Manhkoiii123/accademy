@@ -16,7 +16,7 @@ const page = async ({
     page: searchParams.page || 1,
     limit: 4,
     search: searchParams.search || "",
-    status: searchParams.status || ECourseStatus.APPROVED,
+    status: searchParams.status,
   });
 
   return (
