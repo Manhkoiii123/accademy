@@ -7,8 +7,8 @@ import {
   IconUsers,
 } from "@/components/icons";
 import { TMenuItem } from "@/types";
-import { ECourseLevel, ECourseStatus } from "@/types/enums";
-
+import { ECourseLevel, ECourseStatus, EOrderStatus } from "@/types/enums";
+export const LIMIT = 4;
 export const menuItem: TMenuItem[] = [
   {
     url: "/",
@@ -129,3 +129,25 @@ export const editorOptions = (field: any, theme: any) => ({
     content_style: `@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap');body { font-family: Manrope,Helvetica,Arial,sans-serif; font-size:14px; line-height: 2; padding-bottom: 32px; } img { max-width: 100%; height: auto; display: block; margin: 0 auto; };`,
   },
 });
+
+export const orderStatus: {
+  title: string;
+  value: EOrderStatus;
+  className?: string;
+}[] = [
+  {
+    title: "Đã duyệt",
+    value: EOrderStatus.COMPLETED,
+    className: "text-green-500 bg-green-500",
+  },
+  {
+    title: "Chờ duyệt",
+    value: EOrderStatus.PENDING,
+    className: "text-orange-500 bg-orange-500",
+  },
+  {
+    title: "Từ chối",
+    value: EOrderStatus.CANCELED,
+    className: "text-red-500 bg-red-500",
+  },
+];

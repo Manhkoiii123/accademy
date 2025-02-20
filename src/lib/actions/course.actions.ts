@@ -1,4 +1,5 @@
 "use server";
+import { LIMIT } from "@/constants";
 import Course, { ICourse } from "@/database/course.modal";
 import Lecture from "@/database/lecture.modal";
 import Lesson from "@/database/lesson.modal";
@@ -17,7 +18,7 @@ export async function getAllCourse(
 ): Promise<{ courses: ICourse[]; totalCount: number } | undefined> {
   try {
     connectToDatabase();
-    const limit = params?.limit || 4;
+    const limit = params?.limit || LIMIT;
     const page = params?.page || 1;
     const search = params?.search;
     const status = params?.status;
