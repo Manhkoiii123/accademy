@@ -37,6 +37,7 @@ import {
 } from "@/components/ui/select";
 import { debounce } from "lodash";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import useQueryString from "@/hooks/useQueryString";
 
 const CourseManage = ({
   courses,
@@ -45,19 +46,15 @@ const CourseManage = ({
   courses: ICourse[];
   totalCount: number;
 }) => {
-  const router = useRouter();
-  const pathname = usePathname();
   const searchParams = useSearchParams();
+  const {
+    handleSearch: handleSearchCourse,
+    handleChangePage,
+    handleSelectStatus,
+  } = useQueryString({
+    totalCount,
+  });
 
-  const createQueryString = useCallback(
-    (name: string, value: string) => {
-      const params = new URLSearchParams(searchParams.toString());
-      params.set(name, value);
-
-      return params.toString();
-    },
-    [searchParams]
-  );
   const handleDeleteCourse = (slug: string) => {
     Swal.fire({
       title: "Are you sure?",
@@ -109,41 +106,7 @@ const CourseManage = ({
       console.log("🚀 ~ handleChangeStatus ~ error:", error);
     }
   };
-  const handleSearchCourse = debounce(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const search = e.target.value;
-      const currentQuery = new URLSearchParams(window.location.search);
-      currentQuery.set("search", search);
-      if (currentQuery.has("page")) {
-        currentQuery.delete("page");
-        currentQuery.set("page", "1");
-      }
-      router.push(`${pathname}?${currentQuery.toString()}`);
-    },
-    500
-  );
 
-  const handleSelectStatus = (status: ECourseStatus) => {
-    const currentQuery = new URLSearchParams(window.location.search);
-    currentQuery.set("status", status);
-    if (currentQuery.has("page")) {
-      currentQuery.delete("page");
-      currentQuery.set("page", "1");
-    }
-    router.push(`${pathname}?${currentQuery.toString()}`);
-  };
-
-  const page = searchParams.get("page") || 1;
-  const handleChangePage = (type: "prev" | "next") => {
-    if (type === "prev" && +page === 1) return;
-    if (type === "next" && +page === +Math.ceil(totalCount / 4)) return;
-    router.push(
-      `${pathname}?${createQueryString(
-        "page",
-        type === "prev" ? String(+page - 1) : String(+page + 1)
-      )}`
-    );
-  };
   return (
     <>
       <Link
@@ -284,7 +247,7 @@ const CourseManage = ({
       <div className="flex justify-end gap-3 mt-5">
         <button
           type="button"
-          disabled={+page === 1}
+          disabled={+(searchParams.get("page") || 1) === 1}
           className={commonClassNames.paginationButton}
           onClick={() => handleChangePage("prev")}
         >
@@ -292,7 +255,9 @@ const CourseManage = ({
         </button>
         <button
           type="button"
-          disabled={+page === +Math.ceil(totalCount / 4)}
+          disabled={
+            +(searchParams.get("page") || 1) === +Math.ceil(totalCount / 4)
+          }
           className={commonClassNames.paginationButton}
           onClick={() => handleChangePage("next")}
         >
