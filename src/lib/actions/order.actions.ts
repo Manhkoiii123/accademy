@@ -5,7 +5,10 @@ import Order, { IOrder } from "@/database/order.modal";
 import User from "@/database/user.modal";
 import { connectToDatabase } from "@/lib/mongoose";
 import { TCreateOrderParams, TGetAllCourseParams } from "@/types";
+import { EOrderStatus } from "@/types/enums";
 import { FilterQuery } from "mongoose";
+import { revalidatePath } from "next/cache";
+import { AnyARecord } from "node:dns";
 
 export async function createOrder(params: TCreateOrderParams) {
   try {
@@ -110,6 +113,82 @@ export async function fetchOrder(
     ]);
 
     return { orders, totalCount: totalCount[0]?.totalCount || 0 };
+  } catch (error) {
+    console.log(error);
+  }
+}
+export async function updateOrderStatus({
+  orderId,
+  status,
+}: {
+  orderId: string;
+  status: EOrderStatus;
+}) {
+  try {
+    connectToDatabase();
+    const order = await Order.findById(orderId)
+      .populate({
+        path: "course",
+        model: Course,
+        select: "_id",
+      })
+      .populate({
+        path: "user",
+        model: User,
+        select: "_id",
+      });
+    if (!order) {
+      return;
+    }
+    const user = await User.findById(order.user._id);
+    if (order.status === EOrderStatus.CANCELED) {
+      return;
+    }
+    if (status === EOrderStatus.CANCELED) {
+      await Order.findByIdAndUpdate(orderId, { status: EOrderStatus.CANCELED });
+    }
+    if (
+      status === EOrderStatus.COMPLETED &&
+      order.status === EOrderStatus.PENDING
+    ) {
+      await Order.findByIdAndUpdate(orderId, {
+        status: EOrderStatus.COMPLETED,
+      });
+      user.courses.push(order.course._id);
+      await user.save();
+    }
+    if (
+      status === EOrderStatus.CANCELED &&
+      order.status === EOrderStatus.COMPLETED
+    ) {
+      await Order.findByIdAndUpdate(orderId, {
+        status: EOrderStatus.PENDING,
+      });
+      user.courses.pull(order.course._id);
+      await user.save();
+    }
+    revalidatePath("/manage/order");
+    revalidatePath("/study");
+    return { success: true };
+  } catch (error) {
+    console.log(error);
+  }
+}
+export async function getOrderDetails({
+  code,
+}: {
+  code: string;
+}): Promise<any | undefined> {
+  try {
+    connectToDatabase();
+    const order = await Order.findOne({
+      code,
+    }).populate({
+      path: "course",
+      select: "title",
+    });
+
+    return JSON.parse(JSON.stringify(order));
   } catch (error) {
     console.log(error);
   }

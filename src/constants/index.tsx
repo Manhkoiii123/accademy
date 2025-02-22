@@ -146,7 +146,7 @@ export const orderStatus: {
     className: "text-orange-500 bg-orange-500",
   },
   {
-    title: "Từ chối",
+    title: "Đã hủy",
     value: EOrderStatus.CANCELED,
     className: "text-red-500 bg-red-500",
   },
