@@ -27,12 +27,15 @@ import {
 import { commonClassNames, LIMIT, orderStatus } from "@/constants";
 import { IOrder } from "@/database/order.modal";
 import useQueryString from "@/hooks/useQueryString";
+import { updateOrderStatus } from "@/lib/actions/order.actions";
 import { cn } from "@/lib/utils";
 import { EOrderStatus } from "@/types/enums";
 import { debounce } from "lodash";
 import { useSearchParams } from "next/navigation";
+import { toast } from "react-toastify";
 import Swal from "sweetalert2";
 interface IOrderManageProps {
+  _id: string;
   code: string;
   total: number;
   amount: number;
@@ -60,19 +63,37 @@ const OrderManage = ({
   } = useQueryString({
     totalCount,
   });
-  const handleCancelOrder = () => {
-    Swal.fire({
-      title: "Bạn có chắc muốn hủy đơn hàng không?",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonText: "Đồng ý",
-      cancelButtonText: "Thoát",
-    }).then(async (result) => {
-      if (result.isConfirmed) {
+  const handleUpdateOrder = async ({
+    orderId,
+    status,
+  }: {
+    orderId: string;
+    status: EOrderStatus;
+  }) => {
+    if (status === EOrderStatus.CANCELED) {
+      Swal.fire({
+        title: "Bạn có chắc muốn hủy đơn hàng không?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Hủy",
+        cancelButtonText: "Thoát",
+      }).then(async (result) => {
+        if (result.isConfirmed) {
+          await updateOrderStatus({
+            orderId,
+            status: EOrderStatus.CANCELED,
+          });
+        }
+      });
+    }
+    if (status === EOrderStatus.COMPLETED) {
+      const response = await updateOrderStatus({ orderId, status });
+
+      if (response?.success) {
+        toast.success("Cập nhật đơn hàng thành công");
       }
-    });
+    }
   };
-  const handleCompleteOrder = () => {};
   return (
     <div>
       <div className="flex flex-col lg:flex-row lg:items-center gap-5 justify-between mb-10">
@@ -149,20 +170,36 @@ const OrderManage = ({
                   </TableCell>
                   <TableCell>
                     <div className="flex gap-3">
-                      <button
-                        type="button"
-                        className={commonClassNames.action}
-                        onClick={handleCompleteOrder}
-                      >
-                        <IconCheck />
-                      </button>
-                      <button
-                        type="button"
-                        className={commonClassNames.action}
-                        onClick={handleCancelOrder}
-                      >
-                        <IconCancel />
-                      </button>
+                      {order.status !== EOrderStatus.CANCELED && (
+                        <>
+                          {order.status === EOrderStatus.PENDING && (
+                            <button
+                              type="button"
+                              className={commonClassNames.action}
+                              onClick={() =>
+                                handleUpdateOrder({
+                                  orderId: order._id,
+                                  status: EOrderStatus.COMPLETED,
+                                })
+                              }
+                            >
+                              <IconCheck />
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            className={commonClassNames.action}
+                            onClick={() =>
+                              handleUpdateOrder({
+                                orderId: order._id,
+                                status: EOrderStatus.CANCELED,
+                              })
+                            }
+                          >
+                            <IconCancel />
+                          </button>
+                        </>
+                      )}
                     </div>
                   </TableCell>
                 </TableRow>
