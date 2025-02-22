@@ -1,0 +1,171 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --breakpoint-xs: 30rem;
+  --breakpoint-2xl: 100rem;
+  --breakpoint-3xl: 120rem;
+}
+
+body {
+  @apply bg-gray-100 dark:bg-grayDarkest dark:text-white antialiased;
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.svg-animate {
+  stroke-dashoffset: 100;
+  stroke-dasharray: 100;
+  animation: dash 3s linear forwards;
+}
+
+@keyframes dash {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.bgDarkMode {
+  @apply bg-white dark:bg-grayDarker;
+}
+
+.borderDarkMode {
+  @apply border-gray-200 dark:border-opacity-10;
+}
+
+.focus-primary:focus {
+  @apply focus:ring-primary focus:ring-4 focus:ring-opacity-10;
+}
+
+.skeleton {
+  @apply mb-2 bg-gray-200 dark:bg-grayDarker animate-pulse;
+}
+
+@media screen and (max-width: 1023.98px) {
+  .course-slider {
+    justify-content: flex-start;
+    grid-auto-columns: 300px;
+    grid-auto-flow: column;
+    overflow: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    scroll-snap-stop: always;
+    -ms-touch-action: manipulation;
+    touch-action: manipulation;
+    -webkit-overflow-scrolling: touch;
+    scroll-padding: 1rem;
+    grid-template-columns: unset;
+  }
+  .course-slider::-webkit-scrollbar {
+    display: none;
+    width: 0;
+  }
+  .course-slider > * {
+    scroll-snap-align: start;
+  }
+}
+
+@media screen and (max-width: 1023.98px) {
+  .table-responsive th:not(:first-child),
+  .table-responsive td:not(:first-child) {
+    padding-left: 100px;
+  }
+}
+
+.entry-content {
+  font-size: 16px;
+  line-height: 2;
+}
+
+.entry-content p,
+.entry-content h1,
+.entry-content h2,
+.entry-content h3,
+.entry-content h4,
+.entry-content h5,
+.entry-content h6,
+.entry-content ul,
+.entry-content ol,
+.entry-content figure {
+  @apply mb-5;
+}
+
+.entry-content ol {
+  list-style: decimal;
+}
+
+.entry-content ul {
+  list-style: disc;
+}
+
+.entry-content ol,
+.entry-content ul {
+  @apply pl-5;
+}
+
+.entry-content a {
+  @apply text-primary underline font-medium;
+}
+
+.button-primary {
+  position: relative;
+  overflow: hidden;
+  z-index: 2;
+}
+
+.button-primary:before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: auto;
+  right: 0;
+  height: 100%;
+  width: 0;
+  background-color: rgba(255, 255, 255, 0.1);
+  transition: all 0.25s linear;
+  z-index: -1;
+}
+
+.button-primary:hover:before {
+  left: 0;
+  width: 100%;
+}
+
+.animate-bar {
+  animation: animate-width 5s linear 1;
+}
+
+@keyframes animate-width {
+  from {
+    width: 100%;
+  }
+  to {
+    width: 0;
+  }
+}
+
+html body .swal2-container .swal2-popup {
+  @apply w-full;
+  max-width: 450px;
+}
+
+html body .swal2-container .swal2-title {
+  @apply font-bold text-xl;
+}
+
+html body .swal2-container .swal2-actions .swal2-confirm {
+  @apply bg-primary w-[150px];
+}
+
+html body .swal2-container .swal2-actions .swal2-cancel {
+  @apply bg-transparent text-grayDarkest hover:bg-transparent hover:bg-none;
+}
+
+
+
+@layer base {}
