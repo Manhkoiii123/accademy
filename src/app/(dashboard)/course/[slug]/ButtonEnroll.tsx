@@ -33,7 +33,6 @@ const ButtonEnroll = ({
     if (newOrder.code) {
       router.push(`/order/${newOrder.code}`);
     }
-    console.log("🚀 ~ handleBuyCourse ~ newOrder:", newOrder);
   };
   return (
     <Button className="w-full" variant={"primary"} onClick={handleBuyCourse}>

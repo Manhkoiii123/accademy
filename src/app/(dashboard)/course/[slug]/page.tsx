@@ -1,7 +1,4 @@
 import PageNotFound from "@/app/not-found";
-import { IconClock, IconPlay, IconStudy, IconUsers } from "@/components/icons";
-import { Button } from "@/components/ui/button";
-import { courseLevelTitle } from "@/constants";
 import { getCourseBySlug } from "@/lib/actions/course.actions";
 import { ECourseStatus } from "@/types/enums";
 import Image from "next/image";
@@ -15,7 +12,8 @@ import {
 import LessonItem from "@/components/lesson/LessonItem";
 import { auth } from "@clerk/nextjs/server";
 import { getUserInfo } from "@/lib/actions/user.actions";
-import ButtonEnroll from "@/app/(dashboard)/course/[slug]/ButtonEnroll";
+import CourseWidget from "@/app/(dashboard)/course/[slug]/CourseWidget";
+import { courseLevelTitle } from "@/constants";
 
 const page = async ({ params }: { params: { slug: string } }) => {
   const data = await getCourseBySlug({ slug: params.slug });
@@ -27,7 +25,7 @@ const page = async ({ params }: { params: { slug: string } }) => {
   }
   const { userId } = auth();
   const findUser = await getUserInfo({ userId: userId! });
-
+  const userCourses = findUser?.courses.map((c) => c.toString());
   if (!data) return null;
   if (data.status !== ECourseStatus.APPROVED) return <PageNotFound />;
   return (
@@ -159,45 +157,11 @@ const page = async ({ params }: { params: { slug: string } }) => {
           ))}
         </BoxSection>
       </div>
-      <div className="">
-        <div className="bg-white rounded-lg p-5 dark:bg-grayDarker">
-          <div className="flex items-center gap-2 mb-3">
-            <strong className="text-primary text-xl font-bold">
-              {data.price.toLocaleString()}đ
-            </strong>
-            <span className="text-slate-400 line-through text-sm">
-              {data.sale_price.toLocaleString()}đ
-            </span>
-            <span className="ml-auto inline-block px-3 py-1 rounded-lg bg-primary bg-opacity-10 text-primary font-semibold text-sm">
-              {Math.ceil((1 - data.price / data.sale_price) * 100)}%
-            </span>
-          </div>
-          <h3 className="font-bold mb-3 text-sm">Khóa học bao gồm có</h3>
-          <ul className="mb-5 flex flex-col gap-2 text-sm text-slate-500">
-            <li className="flex items-center gap-2">
-              <IconClock className="size-4" />
-              <span>30h học</span>
-            </li>
-            <li className="flex items-center gap-2">
-              <IconPlay className="size-4" />
-              <span>Video Full HD</span>
-            </li>
-            <li className="flex items-center gap-2">
-              <IconUsers className="size-4" />
-              <span>Có nhóm hỗ trợ học tập</span>
-            </li>
-            <li className="flex items-center gap-2">
-              <IconStudy className="size-4" />
-              <span>Có tài liệu kèm theo</span>
-            </li>
-          </ul>
-          <ButtonEnroll
-            courseId={data ? JSON.parse(JSON.stringify(data._id)) : null}
-            amount={data.price}
-            user={findUser ? JSON.parse(JSON.stringify(findUser)) : null}
-          />
-        </div>
-      </div>
+      <CourseWidget
+        isEnrolled={userCourses?.includes(data._id.toString())}
+        data={data ? JSON.parse(JSON.stringify(data)) : null}
+        findUser={findUser ? JSON.parse(JSON.stringify(findUser)) : null}
+      />
     </div>
   );
 };

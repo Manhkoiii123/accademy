@@ -8,7 +8,12 @@ import {
 } from "@/components/icons";
 import IconCoupon from "@/components/icons/IconCoupon";
 import { TMenuItem } from "@/types";
-import { ECourseLevel, ECourseStatus, EOrderStatus } from "@/types/enums";
+import {
+  ECouponType,
+  ECourseLevel,
+  ECourseStatus,
+  EOrderStatus,
+} from "@/types/enums";
 export const LIMIT = 4;
 export const menuItem: TMenuItem[] = [
   {
@@ -155,5 +160,19 @@ export const orderStatus: {
     title: "Đã hủy",
     value: EOrderStatus.CANCELED,
     className: "text-red-500 bg-red-500",
+  },
+];
+
+export const couponTypes: {
+  title: string;
+  value: ECouponType;
+}[] = [
+  {
+    title: "Phần trăm",
+    value: ECouponType.PERCENT,
+  },
+  {
+    title: "Giá trị",
+    value: ECouponType.AMOUNT,
   },
 ];
