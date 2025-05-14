@@ -1,3 +1,4 @@
+import ActionDeleteCoupon from "@/app/(dashboard)/manage/coupon/ActionDeleteCoupon";
 import { StatusBadge, TableAction } from "@/components/common";
 import BouncedLink from "@/components/common/BouncedLink";
 import Heading from "@/components/common/Heading";
@@ -27,22 +28,7 @@ import Swal from "sweetalert2";
 
 const page = async () => {
   const coupons = await getCoupons({});
-  const handleDeleteCoupon = (slug: string) => {
-    Swal.fire({
-      title: "Are you sure?",
-      text: "You won't be able to revert this!",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#3085d6",
-      cancelButtonColor: "#d33",
-      confirmButtonText: "Yes, delete it!",
-    }).then(async (result) => {
-      if (result.isConfirmed) {
-        await deleteCoupon(slug);
-        toast.success("Xóa mã giảm giá thành công");
-      }
-    });
-  };
+
   return (
     <div>
       <BouncedLink url="/manage/coupon/new"></BouncedLink>
@@ -111,10 +97,7 @@ const page = async () => {
                       type="edit"
                       url={`/manage/coupon/update?code=${coupon.code}`}
                     />
-                    <TableActionItem
-                      type="delete"
-                      // onClick={() => handleDeleteCoupon(coupon.code)}
-                    />
+                    <ActionDeleteCoupon slug={coupon.code} />
                   </TableAction>
                 </TableCell>
               </TableRow>

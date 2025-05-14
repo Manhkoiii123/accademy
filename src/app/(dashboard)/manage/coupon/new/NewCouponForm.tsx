@@ -2,7 +2,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-
+import { NumericFormat } from "react-number-format";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -41,6 +41,7 @@ import { debounce } from "lodash";
 import { getAllCourse } from "@/lib/actions/course.actions";
 import { Checkbox } from "@/components/ui/checkbox";
 import { IconClose } from "@/components/icons";
+import { InputFormatCurrency } from "@/components/ui/input-format";
 const formSchema = z.object({
   title: z.string({
     message: "Tiêu đề không được để trống",
@@ -54,7 +55,7 @@ const formSchema = z.object({
   startDate: z.string().optional(),
   endDate: z.string().optional(),
   active: z.boolean().optional(),
-  value: z.number().optional(),
+  value: z.string().optional(),
   type: z.string().optional(),
   courses: z.array(z.string()).optional(),
   limit: z.number().optional(),
@@ -86,16 +87,34 @@ const NewCouponForm = () => {
   );
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log("🚀 ~ onSubmit ~ values:", values);
-
     try {
-      const data = {
+      const couponType = values.type;
+      const couponValue = Number(values.value?.replace(/,/g, ""));
+
+      if (
+        couponType === ECouponType.PERCENT &&
+        couponValue &&
+        (couponValue > 100 || couponValue < 0)
+      ) {
+        form.setError("value", {
+          message: "Giá trị không hợp lệ",
+        });
+
+        return;
+      }
+      const newCoupon = await createCoupon({
         ...values,
-        startDate: startDate,
-        endDate: endDate,
-        courses: selectListCourse.map((item) => item._id),
-      };
-      const newCoupon = await createCoupon(data);
+        value: couponValue,
+        start_date: startDate,
+        end_date: endDate,
+        courses: selectListCourse.map((course) => course._id.toString()),
+      });
+
+      if (newCoupon.error) {
+        toast.error(newCoupon.error);
+
+        return;
+      }
       if (newCoupon.code) {
         toast.success("Tạo mã giảm giá thành công");
         router.push("/manage/coupon");
@@ -223,7 +242,7 @@ const NewCouponForm = () => {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Loại coupon</FormLabel>
-                <FormControl>
+                <FormControl className="h-12">
                   <RadioGroup
                     defaultValue={ECouponType.PERCENT}
                     className="flex gap-5"
@@ -251,12 +270,20 @@ const NewCouponForm = () => {
               <FormItem>
                 <FormLabel>Giá trị</FormLabel>
                 <FormControl>
-                  <Input
-                    type="number"
-                    placeholder="50%"
-                    {...field}
-                    onChange={(e) => field.onChange(e.target.valueAsNumber)}
-                  />
+                  <>
+                    {couponTypeWatch === ECouponType.PERCENT ? (
+                      <Input
+                        placeholder="100"
+                        {...field}
+                        onChange={(event) => field.onChange(event.target.value)}
+                      />
+                    ) : (
+                      <InputFormatCurrency
+                        {...field}
+                        onChange={(event) => field.onChange(event.target.value)}
+                      />
+                    )}
+                  </>
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -268,7 +295,7 @@ const NewCouponForm = () => {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Trạng thái</FormLabel>
-                <FormControl>
+                <FormControl className="h-12">
                   <div>
                     <Switch
                       checked={field.value}

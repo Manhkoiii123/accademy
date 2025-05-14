@@ -8,6 +8,7 @@ export async function createCoupon(params: any) {
   try {
     connectToDatabase();
     const newCoupon = await Coupon.create(params);
+    revalidatePath("/manage/coupon");
     return JSON.parse(JSON.stringify(newCoupon));
   } catch (error) {
     console.log(error);

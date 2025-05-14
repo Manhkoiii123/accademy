@@ -2,7 +2,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-
+import { NumericFormat } from "react-number-format";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -37,6 +37,11 @@ import { format } from "date-fns";
 import { createCoupon } from "@/lib/actions/coupon.actions";
 import { toast } from "react-toastify";
 import { redirect, useRouter } from "next/navigation";
+import { debounce } from "lodash";
+import { getAllCourse } from "@/lib/actions/course.actions";
+import { Checkbox } from "@/components/ui/checkbox";
+import { IconClose } from "@/components/icons";
+import { InputFormatCurrency } from "@/components/ui/input-format";
 const formSchema = z.object({
   title: z.string({
     message: "Tiêu đề không được để trống",
@@ -50,12 +55,14 @@ const formSchema = z.object({
   startDate: z.string().optional(),
   endDate: z.string().optional(),
   active: z.boolean().optional(),
-  value: z.number().optional(),
+  value: z.string().optional(),
   type: z.string().optional(),
   courses: z.array(z.string()).optional(),
   limit: z.number().optional(),
 });
 const UpdateCouponForm = () => {
+  const [findCourse, setFindCourse] = useState<any[] | undefined>([]);
+  const [selectListCourse, setSelectListCourse] = useState<any[]>([]);
   const router = useRouter();
   const [startDate, setStartDate] = useState<Date>();
   const [endDate, setEndDate] = useState<Date>();
@@ -65,10 +72,49 @@ const UpdateCouponForm = () => {
       type: ECouponType.PERCENT,
     },
   });
+  const handleSearchCourse = debounce(
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const value = e.target.value;
+      const courseList = await getAllCourse({ search: value });
+      if (courseList) {
+        setFindCourse(courseList.courses);
+      }
+      if (value === "") {
+        setFindCourse([]);
+      }
+    },
+    250
+  );
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      const newCoupon = await createCoupon(values);
+      const couponType = values.type;
+      const couponValue = Number(values.value?.replace(/,/g, ""));
+
+      if (
+        couponType === ECouponType.PERCENT &&
+        couponValue &&
+        (couponValue > 100 || couponValue < 0)
+      ) {
+        form.setError("value", {
+          message: "Giá trị không hợp lệ",
+        });
+
+        return;
+      }
+      const newCoupon = await createCoupon({
+        ...values,
+        value: couponValue,
+        start_date: startDate,
+        end_date: endDate,
+        courses: selectListCourse.map((course) => course._id.toString()),
+      });
+
+      if (newCoupon.error) {
+        toast.error(newCoupon.error);
+
+        return;
+      }
       if (newCoupon.code) {
         toast.success("Tạo mã giảm giá thành công");
         router.push("/manage/coupon");
@@ -76,6 +122,16 @@ const UpdateCouponForm = () => {
     } catch (error) {}
   }
   const couponTypeWatch = form.watch("type");
+
+  const handleSelectCourse = (course: any, checked: boolean | string) => {
+    if (checked) {
+      setSelectListCourse([...selectListCourse, course]);
+    } else {
+      setSelectListCourse(
+        selectListCourse.filter((item) => item._id !== course._id)
+      );
+    }
+  };
 
   return (
     <Form {...form}>
@@ -186,7 +242,7 @@ const UpdateCouponForm = () => {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Loại coupon</FormLabel>
-                <FormControl>
+                <FormControl className="h-12">
                   <RadioGroup
                     defaultValue={ECouponType.PERCENT}
                     className="flex gap-5"
@@ -214,12 +270,20 @@ const UpdateCouponForm = () => {
               <FormItem>
                 <FormLabel>Giá trị</FormLabel>
                 <FormControl>
-                  <Input
-                    type="number"
-                    placeholder="50%"
-                    {...field}
-                    onChange={(e) => field.onChange(e.target.valueAsNumber)}
-                  />
+                  <>
+                    {couponTypeWatch === ECouponType.PERCENT ? (
+                      <Input
+                        placeholder="100"
+                        {...field}
+                        onChange={(event) => field.onChange(event.target.value)}
+                      />
+                    ) : (
+                      <InputFormatCurrency
+                        {...field}
+                        onChange={(event) => field.onChange(event.target.value)}
+                      />
+                    )}
+                  </>
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -231,7 +295,7 @@ const UpdateCouponForm = () => {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Trạng thái</FormLabel>
-                <FormControl>
+                <FormControl className="h-12">
                   <div>
                     <Switch
                       checked={field.value}
@@ -268,14 +332,58 @@ const UpdateCouponForm = () => {
               <FormItem>
                 <FormLabel>Khóa học</FormLabel>
                 <FormControl>
-                  <Select>
+                  {/* <Select>
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Chọn khóa học" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectGroup></SelectGroup>
                     </SelectContent>
-                  </Select>
+                  </Select> */}
+                  <>
+                    <Input
+                      placeholder="Tìm kiếm khóa học"
+                      onChange={(e) => handleSearchCourse(e)}
+                    />
+                    {findCourse && findCourse?.length > 0 && (
+                      <div className="flex flex-col gap-2 !mt-5">
+                        {findCourse?.map((course) => (
+                          <Label
+                            key={course.title}
+                            className="flex gap-2 items-center font-medium text-sm cursor-pointer"
+                            htmlFor={course.title}
+                          >
+                            <Checkbox
+                              id={course.title}
+                              checked={selectListCourse.some(
+                                (item) => item._id === course._id
+                              )}
+                              onCheckedChange={(checked) =>
+                                handleSelectCourse(course, checked)
+                              }
+                            />
+                            <span>{course.title}</span>
+                          </Label>
+                        ))}
+                      </div>
+                    )}
+                    <div className="flex items-start flex-wrap gap-2 !mt-5">
+                      {selectListCourse?.map((course) => (
+                        <div
+                          key={course.title}
+                          className="inline-flex gap-2 items-center font-semibold text-sm px-3 py-1 rounded-lg border borderDarkMode bgDarkMode"
+                        >
+                          <span>{course.title}</span>
+                          <button
+                            type="button"
+                            onClick={() => handleSelectCourse(course, false)}
+                          >
+                            <IconClose className="size-5 text-gray-400 hover:text-gray-600" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </>
                 </FormControl>
                 <FormMessage />
               </FormItem>
