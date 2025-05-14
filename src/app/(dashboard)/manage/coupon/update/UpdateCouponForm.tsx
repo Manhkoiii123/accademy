@@ -37,10 +37,6 @@ import { format } from "date-fns";
 import { createCoupon } from "@/lib/actions/coupon.actions";
 import { toast } from "react-toastify";
 import { redirect, useRouter } from "next/navigation";
-import { debounce } from "lodash";
-import { getAllCourse } from "@/lib/actions/course.actions";
-import { Checkbox } from "@/components/ui/checkbox";
-import { IconClose } from "@/components/icons";
 const formSchema = z.object({
   title: z.string({
     message: "Tiêu đề không được để trống",
@@ -59,9 +55,7 @@ const formSchema = z.object({
   courses: z.array(z.string()).optional(),
   limit: z.number().optional(),
 });
-const NewCouponForm = () => {
-  const [findCourse, setFindCourse] = useState<any[] | undefined>([]);
-  const [selectListCourse, setSelectListCourse] = useState<any[]>([]);
+const UpdateCouponForm = () => {
   const router = useRouter();
   const [startDate, setStartDate] = useState<Date>();
   const [endDate, setEndDate] = useState<Date>();
@@ -71,31 +65,10 @@ const NewCouponForm = () => {
       type: ECouponType.PERCENT,
     },
   });
-  const handleSearchCourse = debounce(
-    async (e: React.ChangeEvent<HTMLInputElement>) => {
-      const value = e.target.value;
-      const courseList = await getAllCourse({ search: value });
-      if (courseList) {
-        setFindCourse(courseList.courses);
-      }
-      if (value === "") {
-        setFindCourse([]);
-      }
-    },
-    250
-  );
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log("🚀 ~ onSubmit ~ values:", values);
-
     try {
-      const data = {
-        ...values,
-        startDate: startDate,
-        endDate: endDate,
-        courses: selectListCourse.map((item) => item._id),
-      };
-      const newCoupon = await createCoupon(data);
+      const newCoupon = await createCoupon(values);
       if (newCoupon.code) {
         toast.success("Tạo mã giảm giá thành công");
         router.push("/manage/coupon");
@@ -103,16 +76,6 @@ const NewCouponForm = () => {
     } catch (error) {}
   }
   const couponTypeWatch = form.watch("type");
-
-  const handleSelectCourse = (course: any, checked: boolean | string) => {
-    if (checked) {
-      setSelectListCourse([...selectListCourse, course]);
-    } else {
-      setSelectListCourse(
-        selectListCourse.filter((item) => item._id !== course._id)
-      );
-    }
-  };
 
   return (
     <Form {...form}>
@@ -305,58 +268,14 @@ const NewCouponForm = () => {
               <FormItem>
                 <FormLabel>Khóa học</FormLabel>
                 <FormControl>
-                  {/* <Select>
+                  <Select>
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Chọn khóa học" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectGroup></SelectGroup>
                     </SelectContent>
-                  </Select> */}
-                  <>
-                    <Input
-                      placeholder="Tìm kiếm khóa học"
-                      onChange={(e) => handleSearchCourse(e)}
-                    />
-                    {findCourse && findCourse?.length > 0 && (
-                      <div className="flex flex-col gap-2 !mt-5">
-                        {findCourse?.map((course) => (
-                          <Label
-                            key={course.title}
-                            className="flex gap-2 items-center font-medium text-sm cursor-pointer"
-                            htmlFor={course.title}
-                          >
-                            <Checkbox
-                              id={course.title}
-                              checked={selectListCourse.some(
-                                (item) => item._id === course._id
-                              )}
-                              onCheckedChange={(checked) =>
-                                handleSelectCourse(course, checked)
-                              }
-                            />
-                            <span>{course.title}</span>
-                          </Label>
-                        ))}
-                      </div>
-                    )}
-                    <div className="flex items-start flex-wrap gap-2 !mt-5">
-                      {selectListCourse?.map((course) => (
-                        <div
-                          key={course.title}
-                          className="inline-flex gap-2 items-center font-semibold text-sm px-3 py-1 rounded-lg border borderDarkMode bgDarkMode"
-                        >
-                          <span>{course.title}</span>
-                          <button
-                            type="button"
-                            onClick={() => handleSelectCourse(course, false)}
-                          >
-                            <IconClose className="size-5 text-gray-400 hover:text-gray-600" />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  </>
+                  </Select>
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -364,11 +283,11 @@ const NewCouponForm = () => {
           />
         </div>
         <Button variant="primary" className="w-[150px] ml-auto flex">
-          Tạo mã
+          Cập nhật
         </Button>
       </form>
     </Form>
   );
 };
 
-export default NewCouponForm;
+export default UpdateCouponForm;

@@ -31,8 +31,8 @@ export type TUpdateCourseParams = {
   path?: string;
 };
 export type TGetAllCourseParams = {
-  page: number;
-  limit: number;
+  page?: number;
+  limit?: number;
   search?: string;
   status?: string;
 };

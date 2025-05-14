@@ -43,7 +43,7 @@ export async function getAllCourse(
 
     const totalCount = await Course.countDocuments(query);
 
-    return { courses, totalCount };
+    return { courses: JSON.parse(JSON.stringify(courses)), totalCount };
   } catch (error) {
     console.log("🚀 ~ getAllCourse ~ error:", error);
   }

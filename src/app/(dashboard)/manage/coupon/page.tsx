@@ -1,17 +1,48 @@
+import { StatusBadge, TableAction } from "@/components/common";
 import BouncedLink from "@/components/common/BouncedLink";
 import Heading from "@/components/common/Heading";
-import { IconLeftArrow, IconRightArrow } from "@/components/icons";
+import PaginationButton from "@/components/common/PaginationButton";
+import TableActionItem from "@/components/common/TableActionItem";
+import {
+  IconDelete,
+  IconEdit,
+  IconEye,
+  IconLeftArrow,
+  IconRightArrow,
+} from "@/components/icons";
 import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
+  TableCell,
   TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { commonClassNames } from "@/constants";
+import { commonClassNames, couponTypes } from "@/constants";
+import { deleteCoupon, getCoupons } from "@/lib/actions/coupon.actions";
+import { ECouponType } from "@/types/enums";
+import { toast } from "react-toastify";
+import Swal from "sweetalert2";
 
-const page = () => {
+const page = async () => {
+  const coupons = await getCoupons({});
+  const handleDeleteCoupon = (slug: string) => {
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, delete it!",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        await deleteCoupon(slug);
+        toast.success("Xóa mã giảm giá thành công");
+      }
+    });
+  };
   return (
     <div>
       <BouncedLink url="/manage/coupon/new"></BouncedLink>
@@ -34,16 +65,63 @@ const page = () => {
             <TableHead>Hành động</TableHead>
           </TableRow>
         </TableHeader>
-        <TableBody></TableBody>
+        <TableBody>
+          {!!coupons &&
+            coupons.length > 0 &&
+            coupons.map((coupon) => (
+              <TableRow key={coupon.code}>
+                <TableCell>
+                  <strong>{coupon.code}</strong>
+                </TableCell>
+                <TableCell>
+                  <strong>{coupon.title}</strong>
+                </TableCell>
+                <TableCell>
+                  {coupon.type === ECouponType.AMOUNT ? (
+                    <>{coupon.value.toLocaleString("us-US")}</>
+                  ) : (
+                    <>{coupon.value}%</>
+                  )}
+                </TableCell>
+                <TableCell>
+                  {coupon.used} / {coupon.limit}
+                </TableCell>
+                <TableCell>
+                  {coupon.active ? (
+                    <StatusBadge
+                      item={{
+                        title: "Đang kích hoạt",
+                        className: "text-green-600",
+                      }}
+                    />
+                  ) : (
+                    // <BadgeStatus title="Đang kích hoạt" variant="success" />
+                    <StatusBadge
+                      item={{
+                        title: "Chưa kích hoạt",
+                        className: "text-orange-600",
+                      }}
+                    />
+                    // <BadgeStatus title="Chưa kích hoạt" variant="warning" />
+                  )}
+                </TableCell>
+                <TableCell>
+                  <TableAction>
+                    <TableActionItem
+                      type="edit"
+                      url={`/manage/coupon/update?code=${coupon.code}`}
+                    />
+                    <TableActionItem
+                      type="delete"
+                      // onClick={() => handleDeleteCoupon(coupon.code)}
+                    />
+                  </TableAction>
+                </TableCell>
+              </TableRow>
+            ))}
+        </TableBody>
       </Table>
-      <div className="flex justify-end gap-3 mt-5">
-        <button className={commonClassNames.paginationButton}>
-          <IconLeftArrow />
-        </button>
-        <button className={commonClassNames.paginationButton}>
-          <IconRightArrow />
-        </button>
-      </div>
+      <PaginationButton></PaginationButton>
     </div>
   );
 };

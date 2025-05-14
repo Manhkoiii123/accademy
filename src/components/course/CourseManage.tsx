@@ -38,6 +38,8 @@ import {
 import { debounce } from "lodash";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import useQueryString from "@/hooks/useQueryString";
+import { TableAction } from "@/components/common";
+import TableActionItem from "@/components/common/TableActionItem";
 
 const CourseManage = ({
   courses,
@@ -211,33 +213,21 @@ const CourseManage = ({
                     </button>
                   </TableCell>
                   <TableCell>
-                    <div className="flex gap-3">
-                      <Link
-                        href={`/course/${c.slug}`}
-                        target="_blank"
-                        className={commonClassNames.action}
-                      >
-                        <IconEye />
-                      </Link>
-                      <Link
-                        href={`/manage/course/update?slug=${c.slug}`}
-                        className={commonClassNames.action}
-                      >
-                        <IconEdit />
-                      </Link>
-                      <button
+                    <TableAction>
+                      <TableActionItem
+                        url={`/manage/course/update?slug=${c.slug}`}
+                        type="edit"
+                      />
+                      <TableActionItem
+                        url={`/manage/course/update-content?slug=${c.slug}`}
+                        type="study"
+                      />
+                      <TableActionItem
                         onClick={() => handleDeleteCourse(c.slug)}
-                        className={commonClassNames.action}
-                      >
-                        <IconDelete />
-                      </button>
-                      <Link
-                        href={`/manage/course/update-content?slug=${c.slug}`}
-                        className={commonClassNames.action}
-                      >
-                        <IconStudy />
-                      </Link>
-                    </div>
+                        type="delete"
+                      />
+                      <TableActionItem url={`/course/${c.slug}`} type="view" />
+                    </TableAction>
                   </TableCell>
                 </TableRow>
               );
