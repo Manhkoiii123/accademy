@@ -1,10 +1,12 @@
+"use client";
 import ButtonEnroll from "@/app/(dashboard)/course/[slug]/ButtonEnroll";
 import { IconClock, IconPlay, IconStudy, IconUsers } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { IUser } from "@/database/user.modal";
 import { TCourseUpdateParams } from "@/types";
 import Link from "next/link";
-import React from "react";
+import React, { useState } from "react";
+import CouponForm from "./CouponForm";
 
 const CourseWidget = ({
   data,
@@ -15,12 +17,14 @@ const CourseWidget = ({
   findUser: IUser | null | undefined;
   isEnrolled?: boolean;
 }) => {
+  const [price, setPrice] = useState<number>(data.price);
+  const [coupon, setCoupon] = useState("");
   return (
     <div className="">
       <div className="bg-white rounded-lg p-5 dark:bg-grayDarker">
         <div className="flex items-center gap-2 mb-3">
           <strong className="text-primary text-xl font-bold">
-            {data.price.toLocaleString()}đ
+            {price.toLocaleString()}đ
           </strong>
           <span className="text-slate-400 line-through text-sm">
             {data.sale_price.toLocaleString()}đ
@@ -57,10 +61,17 @@ const CourseWidget = ({
         ) : (
           <ButtonEnroll
             courseId={data ? JSON.parse(JSON.stringify(data._id)) : null}
-            amount={data.price}
+            amount={price}
             user={findUser ? JSON.parse(JSON.stringify(findUser)) : null}
+            coupon={coupon}
           />
         )}
+        <CouponForm
+          setCouponId={setCoupon}
+          setPrice={setPrice}
+          courseId={data ? JSON.parse(JSON.stringify(data._id)) : null}
+          originalPrice={data.price}
+        ></CouponForm>
       </div>
     </div>
   );

@@ -8,12 +8,16 @@ import { TCreateOrderParams, TGetAllCourseParams } from "@/types";
 import { EOrderStatus } from "@/types/enums";
 import { FilterQuery } from "mongoose";
 import { revalidatePath } from "next/cache";
-import { AnyARecord } from "node:dns";
-
+import Coupon from "../../database/coupon.modal";
 export async function createOrder(params: TCreateOrderParams) {
   try {
     connectToDatabase();
     const newOrder = await Order.create(params);
+    if (params.coupon) {
+      await Coupon.findByIdAndUpdate(params.coupon, {
+        $inc: { used: 1 },
+      });
+    }
     return JSON.parse(JSON.stringify(newOrder));
   } catch (error) {
     console.log(error);
@@ -67,7 +71,21 @@ export async function fetchOrder(
           as: "userData",
         },
       },
+      {
+        $lookup: {
+          from: "coupons",
+          localField: "coupon",
+          foreignField: "_id",
+          as: "couponData",
+        },
+      },
       { $unwind: "$courseData" },
+      {
+        $unwind: {
+          path: "$couponData",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
       { $unwind: "$userData" },
       { $match: matchQuery },
       { $sort: { created_at: -1 } },
@@ -82,9 +100,10 @@ export async function fetchOrder(
           amount: 1,
           discount: 1,
           total: 1,
-          coupon: 1,
+          // coupon: 1,
           "course.title": "$courseData.title",
           "user.name": "$userData.name",
+          coupon: "$couponData.code",
         },
       },
     ]);

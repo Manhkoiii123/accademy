@@ -116,3 +116,10 @@ export type TUpdateCouponParams = {
   _id: string;
   updateData: Partial<TCreateCouponParams>;
 };
+
+export type TCouponParams = Omit<ICoupon, "courses"> & {
+  courses: {
+    _id: string;
+    title: string;
+  }[];
+};

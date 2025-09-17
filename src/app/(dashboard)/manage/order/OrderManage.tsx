@@ -47,6 +47,7 @@ interface IOrderManageProps {
   user: {
     name: string;
   };
+  coupon?: string;
 }
 const OrderManage = ({
   orders = [],
@@ -164,7 +165,9 @@ const OrderManage = ({
                       </strong>
                     </div>
                   </TableCell>
-                  <TableCell></TableCell>
+                  <TableCell>
+                    <strong>{order.coupon || ""}</strong>
+                  </TableCell>
                   <TableCell>
                     <StatusBadge item={orderStatusItem}></StatusBadge>
                   </TableCell>
