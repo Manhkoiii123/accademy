@@ -30,11 +30,11 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { CalendarIcon } from "@radix-ui/react-icons";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ECouponType } from "@/types/enums";
-import { couponTypes } from "@/constants";
+import { couponFormSchema, couponTypes } from "@/constants";
 import { format } from "date-fns";
-import { createCoupon } from "@/lib/actions/coupon.actions";
+import { createCoupon, updateCoupon } from "@/lib/actions/coupon.actions";
 import { toast } from "react-toastify";
 import { redirect, useRouter } from "next/navigation";
 import { debounce } from "lodash";
@@ -42,36 +42,34 @@ import { getAllCourse } from "@/lib/actions/course.actions";
 import { Checkbox } from "@/components/ui/checkbox";
 import { IconClose } from "@/components/icons";
 import { InputFormatCurrency } from "@/components/ui/input-format";
-const formSchema = z.object({
-  title: z.string({
-    message: "Tiêu đề không được để trống",
-  }),
-  code: z
-    .string({
-      message: "Mã khuyến mãi không được để trống",
-    })
-    .min(3, "Mã khuyến mãi phải có ít nhất 3 ký tự")
-    .max(10, "Mã khuyến mãi có nhiều nhất 10 ký tự"),
-  startDate: z.string().optional(),
-  endDate: z.string().optional(),
-  active: z.boolean().optional(),
-  value: z.string().optional(),
-  type: z.string().optional(),
-  courses: z.array(z.string()).optional(),
-  limit: z.number().optional(),
-});
-const UpdateCouponForm = () => {
+import { ICoupon } from "@/database/coupon.modal";
+
+const UpdateCouponForm = ({ data }: { data: ICoupon }) => {
   const [findCourse, setFindCourse] = useState<any[] | undefined>([]);
   const [selectListCourse, setSelectListCourse] = useState<any[]>([]);
   const router = useRouter();
-  const [startDate, setStartDate] = useState<Date>();
-  const [endDate, setEndDate] = useState<Date>();
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const [startDate, setStartDate] = useState<Date>(
+    data.start_date ? new Date(data.start_date) : new Date(Date.now())
+  );
+  const [endDate, setEndDate] = useState<Date>(
+    data.end_date ? new Date(data.end_date) : new Date(Date.now())
+  );
+  const form = useForm<z.infer<typeof couponFormSchema>>({
+    resolver: zodResolver(couponFormSchema),
     defaultValues: {
-      type: ECouponType.PERCENT,
+      title: data.title,
+      code: data.code,
+      active: data.active,
+      value: data.value.toString(),
+      limit: data.limit,
+      type: data.type,
     },
   });
+  useEffect(() => {
+    if (data.courses) {
+      setSelectListCourse(data.courses);
+    }
+  }, [data.courses]);
   const handleSearchCourse = debounce(
     async (e: React.ChangeEvent<HTMLInputElement>) => {
       const value = e.target.value;
@@ -86,7 +84,7 @@ const UpdateCouponForm = () => {
     250
   );
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: z.infer<typeof couponFormSchema>) {
     try {
       const couponType = values.type;
       const couponValue = Number(values.value?.replace(/,/g, ""));
@@ -102,12 +100,15 @@ const UpdateCouponForm = () => {
 
         return;
       }
-      const newCoupon = await createCoupon({
-        ...values,
-        value: couponValue,
-        start_date: startDate,
-        end_date: endDate,
-        courses: selectListCourse.map((course) => course._id.toString()),
+      const newCoupon = await updateCoupon({
+        _id: data._id,
+        updateData: {
+          ...values,
+          value: couponValue,
+          start_date: startDate,
+          end_date: endDate,
+          courses: selectListCourse.map((course) => course._id.toString()),
+        },
       });
 
       if (newCoupon.error) {
@@ -116,7 +117,7 @@ const UpdateCouponForm = () => {
         return;
       }
       if (newCoupon.code) {
-        toast.success("Tạo mã giảm giá thành công");
+        toast.success("Update mã giảm giá thành công");
         router.push("/manage/coupon");
       }
     } catch (error) {}
@@ -174,7 +175,7 @@ const UpdateCouponForm = () => {
           />
           <FormField
             control={form.control}
-            name="startDate"
+            name="start_date"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Ngày bắt đầu</FormLabel>
@@ -194,7 +195,7 @@ const UpdateCouponForm = () => {
                       <Calendar
                         mode="single"
                         selected={startDate}
-                        onSelect={setStartDate}
+                        onSelect={(day) => day && setStartDate(day)}
                         initialFocus
                       />
                     </PopoverContent>
@@ -206,7 +207,7 @@ const UpdateCouponForm = () => {
           />
           <FormField
             control={form.control}
-            name="endDate"
+            name="end_date"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Ngày kết thúc</FormLabel>
@@ -226,7 +227,7 @@ const UpdateCouponForm = () => {
                       <Calendar
                         mode="single"
                         selected={endDate}
-                        onSelect={setEndDate}
+                        onSelect={(day) => day && setEndDate(day)}
                         initialFocus
                       />
                     </PopoverContent>
@@ -247,6 +248,7 @@ const UpdateCouponForm = () => {
                     defaultValue={ECouponType.PERCENT}
                     className="flex gap-5"
                     onValueChange={field.onChange}
+                    value={field.value}
                   >
                     {couponTypes.map((type) => (
                       <div

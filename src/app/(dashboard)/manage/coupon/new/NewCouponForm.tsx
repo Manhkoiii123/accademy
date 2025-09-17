@@ -32,7 +32,7 @@ import { Switch } from "@/components/ui/switch";
 import { CalendarIcon } from "@radix-ui/react-icons";
 import { useState } from "react";
 import { ECouponType } from "@/types/enums";
-import { couponTypes } from "@/constants";
+import { couponFormSchema, couponTypes } from "@/constants";
 import { format } from "date-fns";
 import { createCoupon } from "@/lib/actions/coupon.actions";
 import { toast } from "react-toastify";
@@ -42,34 +42,24 @@ import { getAllCourse } from "@/lib/actions/course.actions";
 import { Checkbox } from "@/components/ui/checkbox";
 import { IconClose } from "@/components/icons";
 import { InputFormatCurrency } from "@/components/ui/input-format";
-const formSchema = z.object({
-  title: z.string({
-    message: "Tiêu đề không được để trống",
-  }),
-  code: z
-    .string({
-      message: "Mã khuyến mãi không được để trống",
-    })
-    .min(3, "Mã khuyến mãi phải có ít nhất 3 ký tự")
-    .max(10, "Mã khuyến mãi có nhiều nhất 10 ký tự"),
-  startDate: z.string().optional(),
-  endDate: z.string().optional(),
-  active: z.boolean().optional(),
-  value: z.string().optional(),
-  type: z.string().optional(),
-  courses: z.array(z.string()).optional(),
-  limit: z.number().optional(),
-});
+
 const NewCouponForm = () => {
   const [findCourse, setFindCourse] = useState<any[] | undefined>([]);
   const [selectListCourse, setSelectListCourse] = useState<any[]>([]);
   const router = useRouter();
   const [startDate, setStartDate] = useState<Date>();
   const [endDate, setEndDate] = useState<Date>();
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<z.infer<typeof couponFormSchema>>({
+    resolver: zodResolver(couponFormSchema),
     defaultValues: {
       type: ECouponType.PERCENT,
+      value: "0",
+      limit: 0,
+      title: "",
+      code: "",
+      start_date: "",
+      end_date: "",
+      courses: [],
     },
   });
   const handleSearchCourse = debounce(
@@ -86,7 +76,7 @@ const NewCouponForm = () => {
     250
   );
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: z.infer<typeof couponFormSchema>) {
     try {
       const couponType = values.type;
       const couponValue = Number(values.value?.replace(/,/g, ""));
@@ -174,7 +164,7 @@ const NewCouponForm = () => {
           />
           <FormField
             control={form.control}
-            name="startDate"
+            name="start_date"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Ngày bắt đầu</FormLabel>
@@ -206,7 +196,7 @@ const NewCouponForm = () => {
           />
           <FormField
             control={form.control}
-            name="endDate"
+            name="end_date"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Ngày kết thúc</FormLabel>
